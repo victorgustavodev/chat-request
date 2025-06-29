@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="120px" viewBox="0 0 100 120" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="dino-mascot">
+            <!-- Body -->
+            <ellipse id="body" fill="#2E7D32" cx="50" cy="70" rx="30" ry="25"></ellipse>
+            
+            <!-- Head -->
+            <circle id="head" fill="#2E7D32" cx="40" cy="35" r="20"></circle>
+            
+            <!-- Eye -->
+            <circle id="eye" fill="white" cx="35" cy="30" r="5"></circle>
+            <circle id="pupil" fill="black" cx="35" cy="30" r="2"></circle>
+            
+            <!-- Mouth -->
+            <path d="M25,40 C35,45 45,38 50,38" id="mouth" stroke="#1B5E20" stroke-width="2" stroke-linecap="round"></path>
+            
+            <!-- Arms -->
+            <path d="M30,65 C20,60 15,65 10,70" id="left-arm" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"></path>
+            <path d="M70,65 C80,60 85,65 90,70" id="right-arm" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"></path>
+            
+            <!-- Tail -->
+            <path d="M70,80 C85,90 85,100 80,110" id="tail" stroke="#2E7D32" stroke-width="10" stroke-linecap="round"></path>
+        </g>
+    </g>
+</svg> 
