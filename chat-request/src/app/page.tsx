@@ -4,7 +4,7 @@ import { ChatBot } from "@/components/ChatBot";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-emerald-500 lg:bg-gray-100">
+    <div className="min-h-screegray-1n bg-emerald-500 lg:bg-00">
       <ChatBot />
     </div>
   );
