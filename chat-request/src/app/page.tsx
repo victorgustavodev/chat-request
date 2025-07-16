@@ -1,11 +1,56 @@
 "use client";
 
-import { ChatBot } from "@/components/ChatBot";
+import Link from "next/link";
+import Button from "@/components/Button";
+import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="min-h-screegray-1n bg-emerald-500 lg:bg-00">
-      <ChatBot />
+    <div className="h-screen bg-white flex items-center justify-center">
+      <div className="bg-white min-w-full min-h-full rounded-lg flex flex-col justify-evenly items-center">
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex gap-3">
+          <Image
+            src="/images/aligator_200.png"
+            alt="logo"
+            width={200}
+            height={200}
+          />
+
+          {/* <Image
+          src="/images/logo-if.jpg"
+          alt="logo"
+            width={200}
+            height={200}
+          >
+          </Image> */}
+          
+          </div>
+
+          <h1 className="text-black text-4xl font-bold mb-2 text-center">
+            CHAT REQUEST
+          </h1>
+
+          <p className="text-center text-gray-400">
+            REALIZE E GERENCIE SEUS REQUERIMENTOS
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4 w-4/5 md:w-4/6 lg:w-2/6">
+
+          <Link href="/signin">
+            <Button className="w-full bg-[#002415] text-white">
+              Acessar sua conta
+            </Button>
+          </Link>
+
+          <Link href="/signup">
+            <Button className="w-full bg-white text-black border-2">
+              Cadastre-se
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

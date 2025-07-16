@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { FaEyeSlash } from 'react-icons/fa';
+import { IoEyeSharp } from 'react-icons/io5';
 
 interface TextFieldProps {
   label?: string;
@@ -93,11 +95,11 @@ export default function TextField({
   }
 
   return (
-    <div className="relative w-full mt-4">
+    <div className="w-2/3 mx-auto mt-4">
       {label && (
         <label
           htmlFor={label}
-          className={`absolute left-3 px-1 bg-white z-10 transition-all duration-200 text-xs ${
+          className={`bg-white z-10 transition-all duration-200 text-sm font-semibold ${
             showFloatingLabel ? '-top-2 text-emerald-600' : 'top-2.5 text-gray-400'
           }`}
         >
@@ -105,7 +107,7 @@ export default function TextField({
         </label>
       )}
 
-      <div className="relative flex items-center">
+      <div className="relative flex items-center w-full">
         <input
           ref={inputRef}
           id={label}
@@ -118,27 +120,30 @@ export default function TextField({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={`w-full text-base py-2 pr-10 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 text-gray-900 px-3`}
+          style={{ paddingRight: '2.5rem' }}
         />
 
-        {type === 'password' ? (
+        {(type === 'password') ? (
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-2 p-1"
+            className="absolute text-xl right-3 top-1/2 -translate-y-1/2 text-[#4C9B7C] flex items-center justify-center bg-white"
             tabIndex={-1}
           >
             {showPassword ? (
-              <img src="/eye.svg" alt="Esconder senha" className="w-4 h-4" />
+              <FaEyeSlash />
             ) : (
-              <img src="/close-eye.svg" alt="Mostrar senha" className="w-4 h-4" />
+              <IoEyeSharp />
             )}
           </button>
         ) : (
           icon && (
-            <div className='absolute right-2 p-1'>
-            <div className="w-3 h-3 flex items-center justify-center">
-              {icon}
-            </div>
+            <div
+              className="absolute text-xl right-3 top-1/2 -translate-y-1/2 flex items-center justify-center bg-white"
+            >
+              <div className="text-[#4C9B7C] flex items-center justify-center">
+                {icon}
+              </div>
             </div>
           )
         )}

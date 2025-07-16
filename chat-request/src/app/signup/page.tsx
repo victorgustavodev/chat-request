@@ -3,6 +3,7 @@
 import TextField from "@/components/Field/TextField";
 import Button from "@/components/Button";
 import Aside from "@/components/Aside";
+import Image from "next/image";
 
 export default function Signup() {
   return (
@@ -17,25 +18,25 @@ export default function Signup() {
           label="Nome"
           type="text"
           placeholder="Digite seu nome e sobrenome"
-          icon={<img src="/user.svg" alt="nome" />}
+          icon={<Image src="/user.svg" alt="nome" width={24} height={24} />}
         />
         <TextField
           label="CPF"
           type="cpf"
           placeholder="000.000.000-00"
-          icon={<img src="/cpf.svg" alt="cpf" />}
+          icon={<Image src="/cpf.svg" alt="cpf" width={24} height={24} />}
         />
         <TextField
           label="Telefone"
           type="phone"
           placeholder="(00) 00000-0000"
-          icon={<img src="/phone.svg" alt="telefone" />}
+          icon={<Image src="/phone.svg" alt="telefone" width={24} height={24} />}
         />
         <TextField
           label="Email"
           type="email"
           placeholder="exemplo@gmail.com"
-          icon={<img src="/email.svg" alt="email" />}
+          icon={<Image src="/email.svg" alt="email" width={24} height={24} />}
         />
         <TextField
           label="Senha"

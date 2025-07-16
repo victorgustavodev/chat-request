@@ -43,7 +43,7 @@ export default function Aside({
 
       <div className="flex items-center justify-center w-full gap-6">
         <Image
-          src="/aligator-70.svg"
+          src="/images/aligator-70.svg"
           alt="Logo Chat Request"
           width={180}
           height={180}
