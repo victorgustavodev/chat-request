@@ -1,43 +1,36 @@
-# 📚 Chat Request
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Este sistema tem como objetivo facilitar o processo de solicitação de requerimentos acadêmicos por meio de um *chatbot interativo*, oferecendo aos alunos uma experiência prática, intuitiva e centralizada.
+## Getting Started
 
----
+First, run the development server:
 
-## 🧠 Funcionalidades
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-- Chatbot interativo com respostas automáticas e direcionamento de opções.
-- Identificação do aluno por Nome completo, Matrícula e CPF.
-- Listagem e seleção de serviços disponíveis (ex: abono de faltas, cancelamento de matrícula, atualização de dados, solicitação de ementas, entre outros).
-- Upload de documentos comprobatórios, quando exigido pelo tipo de requerimento.
-- Encaminhamento automático dos dados para o setor responsável.
-- Mensagens de feedback ao usuário sobre o status da solicitação.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
----
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## 🛠 Tecnologias Utilizadas
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-*Front*: react + tailwind.css + ts
+## Learn More
 
-*Microservices*:  express + node.js + ts 
+To learn more about Next.js, take a look at the following resources:
 
-*API(back)*: Laravel + Sanctum
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-*Banco*: postegres + Docker + sequelize
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
----
+## Deploy on Vercel
 
-🤝 Colaboradores
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-- [Catarina Silva](mailto:catarinasouzasilvao@gmail.com)
-- [Dylan Borges](mailto:dylanborges06@gmail.com)
-- [Izabelle Alves](mailto:izabelle.alvesbl@gmail.com)
-- [Keila Isabelle](mailto:keiila_isabelle@outlook.com)
-- [Laura Esterfani](mailto:lauraestefa4@gmail.com)
-- [Rubens Lira](mailto:rubenslira371@gmail.com)
-- [Victor Gustavo](mailto:)
-
-# ...
-
-📄 Licença
-Projeto de uso acadêmico e institucional.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
