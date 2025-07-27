@@ -1,100 +1,65 @@
 "use client";
 
-import TextField from "@/components/Field/TextField";
 import Button from "@/components/Button";
+import TextField from "@/components/Field/TextField";
 import Link from "next/link";
-import { FaArrowLeft } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
-import Aside from "@/components/Aside";
 
 export default function Signin() {
   return (
-    <>
-    <div className="hidden lg:block ">
-
-      <div className="min-h-screen bg-emerald-500 flex items-center justify-center">
-        <Aside
-          title="Bem-vindo de volta! Acesse o Chat Request"
-          subtitle="ANÁLISE E SOLICITAÇÃO DE REQUERIMENTOS"
-          footerText='"Ainda não tem uma conta?"'
-          footerButtonText="Cadastra-se" />
-        <div className="bg-white w-130 h-100 rounded-lg shadow-lg p-6 flex flex-col justify-center">
-          <h1 className="text-black text-3xl font-bold mb-2 text-center">Bem Vindo de Volta!</h1>
-          <p className="text-center text-gray-400">Entre para acessar nossos serviços.</p>
-          <TextField
-            label="CPF"
-            type="cpf"
-            placeholder="000.000.000-00"
-            icon={<IoDocumentText />} />
-          <TextField
-            label="Senha"
-            type="password"
-            placeholder="Crie sua senha" />
-          <Button className="w-full mt-4 cursor-pointer bg-teste">Cadastrar</Button>
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Lado esquerdo - visual */}
+      <div className="hidden md:flex flex-col justify-center items-center bg-emerald-600 text-white w-full md:w-1/2 p-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Bem-vindo de volta!</h1>
+          <p className="text-lg max-w-md">
+            Entre para acessar seus requerimentos de forma prática e segura.
+          </p>
         </div>
       </div>
-    
-    </div>
-    
-    <div className="lg:hidden">
-        <div className="h-screen bg-white flex flex-col items-center">
-          <div className="w-full h-auto flex flex-col justify-center items-center p-6 bg-emerald-500">
-            <div className="w-4/5">
-              <div className="w-full flex justify-end">
-                <Link href="/" className="p-2">
-                  <FaArrowLeft />
-                </Link>
-              </div>
 
-              <div className="flex flex-col gap-2 w-full">
-                <h1 className="text-xl sm:text-3xl font-bold">Bem-vindo de volta!</h1>
-                <p className="text-xs sm:text-2xl font-light pb-5 sm:pb-20">
-                  Entre para realizar seus requerimentos.
-                </p>
-                <br />
-                <br />
-              </div>
-            </div>
-          </div>
+      {/* Lado direito - formulário */}
+      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6">
+        <div className="w-full max-w-md">
+          <h2 className="text-2xl font-semibold text-emerald-700 mb-6">Entrar na conta</h2>
 
-          <div className="w-full flex flex-col h-auto justify-center bg-white">
+          <form className="flex flex-col gap-4 bg-white rounded-lg p-6 shadow-md">
+            <TextField
+              label="CPF"
+              type="text"
+              placeholder="000.000.000-00"
+              iconRight={<IoDocumentText />}
+              required
+            />
 
+            <TextField
+              label="Senha"
+              type="password"
+              placeholder="Digite sua senha"
+              required
+            />
 
-          <div className="w-full flex justify-end relative bottom-[20%] sm:bottom-[25%] left-0">
-              <img src="/images/aligator_200.png" alt="" className="w-[120px] sm:w-[200px] scale-x-[-1]" />
-                </div>
-
-            <div className="bg-white rounded-lg flex flex-col sm:gap-3 justify-center items-center">
-              <TextField
-
-                label="CPF"
-                type="cpf"
-                placeholder="000.000.000-00"
-                icon={<IoDocumentText />} />
-
-              <TextField
-                label="Senha"
-                type="password"
-                placeholder="Crie sua senha" />
-
-              <div className="w-2/3 flex justify-end mt-2">
-                <span className="text-sm text-emerald-500">Esqueceu a senha?</span>
-              </div>
+            <div className="flex justify-end">
+              <Link href="/recuperar-senha">
+                <span className="text-sm text-emerald-600 hover:underline">
+                  Esqueceu a senha?
+                </span>
+              </Link>
             </div>
 
-            <div className="flex flex-col justify-center items-center gap-3 sm:gap-5">
-              <Button className="mt-4 w-2/3 cursor-pointer bg-[#002415]">
-                Acessar
-              </Button>
-              <p className="text-[#656262] font-semibold text-xs text-center sm:text-sm w-2/3">
-                Ainda não tem uma conta?
-                <Link href="/signup">
-                  <span className="text-emerald-500"> Cadastre-se</span>
-                </Link>
-              </p>
-            </div>
-          </div>
+            <Button className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded">
+              Acessar
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-gray-600 mt-6">
+            Ainda não tem uma conta?
+            <Link href="/signup" className="text-emerald-600 font-medium hover:underline ml-1">
+              Cadastre-se
+            </Link>
+          </p>
         </div>
-      </div></>
+      </div>
+    </div>
   );
 }

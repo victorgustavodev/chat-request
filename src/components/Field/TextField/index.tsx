@@ -1,153 +1,67 @@
-'use client';
-
-import { useRef, useState } from 'react';
-import { FaEyeSlash } from 'react-icons/fa';
-import { IoEyeSharp } from 'react-icons/io5';
+import React from "react";
 
 interface TextFieldProps {
+  MaxLength?: number;
   label?: string;
-  type?: 'text' | 'password' | 'email' | 'phone' | 'cpf';
+  type?: string;
   placeholder?: string;
+  value?: string | number;
+  onChange?: (value: string) => void;
   required?: boolean;
   disabled?: boolean;
-  defaultValue?: string;
-  icon?: React.ReactNode; // ícone que aparecerá à direita
-  onChange?: (value: string) => void;
+  iconLeft?: React.ReactNode;
+  iconRight?: React.ReactNode;
+  name?: string;
+  className?: string;
 }
 
-export default function TextField({
+const TextField: React.FC<TextFieldProps> = ({
+  MaxLength,
   label,
-  type = 'text',
+  type = "text",
   placeholder,
+  value,
+  onChange,
   required,
   disabled,
-  defaultValue,
-  icon,
-  onChange,
-}: TextFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const [value, setValue] = useState(defaultValue || '');
-
-  const inputType =
-    type === 'password' && showPassword ? 'text' : (type === 'phone' || type === 'cpf' ? 'text' : type);
-  const showFloatingLabel = isFocused || value;
-
-  function formatCPF(value: string) {
-    value = value.replace(/\D/g, '').slice(0, 11);
-    return value
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  }
-
-  function formatPhone(value: string) {
-    value = value.replace(/\D/g, '').slice(0, 11);
-
-    if (value.length === 0) return '';
-    if (value.length <= 2) return `(${value}`;
-    if (value.length <= 6) return `(${value.slice(0, 2)}) ${value.slice(2)}`;
-    return `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
-  }
-
-  function formatValue(value: string) {
-    if (type === 'cpf') return formatCPF(value);
-    if (type === 'phone') return formatPhone(value);
-    return value;
-  }
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const rawValue = e.target.value;
-    const onlyNumbers = rawValue.replace(/\D/g, '');
-    const input = inputRef.current;
-    const cursorPosition = input?.selectionStart || 0;
-
-    let formattedValue = '';
-
-    if (type === 'cpf' || type === 'phone') {
-      formattedValue = formatValue(onlyNumbers);
-      setValue(formattedValue);
-      onChange?.(onlyNumbers);
-    } else {
-      formattedValue = rawValue;
-      setValue(formattedValue);
-      onChange?.(formattedValue);
-    }
-
-    setTimeout(() => {
-      if (!input) return;
-      let newCursorPosition = cursorPosition;
-
-      if (type === 'phone') {
-        const maskChars = ['(', ')', ' ', '-'];
-        if (
-          maskChars.includes(formattedValue.charAt(newCursorPosition - 1)) &&
-          rawValue.length < value.length
-        ) {
-          newCursorPosition = newCursorPosition - 1;
-        }
-      }
-
-      if (newCursorPosition < 0) newCursorPosition = 0;
-      input.setSelectionRange(newCursorPosition, newCursorPosition);
-    }, 0);
-  }
-
+  iconLeft,
+  iconRight,
+  name,
+  className = "",
+}) => {
   return (
-    <div className="w-2/3 mx-auto mt-4">
+    <div className={`flex flex-col gap-1 w-full ${className}`}>
       {label && (
-        <label
-          htmlFor={label}
-          className={`bg-white z-10 transition-all duration-200 text-sm font-semibold ${
-            showFloatingLabel ? '-top-2 text-emerald-600' : 'top-2.5 text-gray-400'
-          }`}
-        >
-          {label} {required && '*'}
+        <label className="text-sm font-medium text-gray-700  mb-1">
+          {label}
         </label>
       )}
-
-      <div className="relative flex items-center w-full">
+      <div
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg border 
+          bg-white 
+          border-gray-300 
+          focus-within:ring-2 ring-emerald-500 
+          transition duration-200 ease-in-out`}
+      >
+        {iconLeft && <span className="text-gray-500">{iconLeft}</span>}
         <input
-          ref={inputRef}
-          id={label}
-          type={inputType}
-          placeholder={showFloatingLabel ? placeholder : ''}
+          maxLength={MaxLength}
+          type={type}
+          name={name}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange && onChange(e.target.value)}
           required={required}
           disabled={disabled}
-          value={value}
-          onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          className={`w-full text-base py-2 pr-10 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 text-gray-900 px-3`}
-          style={{ paddingRight: '2.5rem' }}
+          className={`flex-1 bg-transparent outline-none 
+            text-gray-800 
+            placeholder-gray-400 
+            text-sm sm:text-base`}
         />
-
-        {(type === 'password') ? (
-          <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute text-xl right-3 top-1/2 -translate-y-1/2 text-[#4C9B7C] flex items-center justify-center bg-white"
-            tabIndex={-1}
-          >
-            {showPassword ? (
-              <FaEyeSlash />
-            ) : (
-              <IoEyeSharp />
-            )}
-          </button>
-        ) : (
-          icon && (
-            <div
-              className="absolute text-xl right-3 top-1/2 -translate-y-1/2 flex items-center justify-center bg-white"
-            >
-              <div className="text-[#4C9B7C] flex items-center justify-center">
-                {icon}
-              </div>
-            </div>
-          )
-        )}
+        {iconRight && <span className="text-gray-500">{iconRight}</span>}
       </div>
     </div>
   );
-}
+};
+
+export default TextField;

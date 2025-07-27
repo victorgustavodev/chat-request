@@ -9,8 +9,8 @@ type Message = {
   id: string;
   text: string;
   isBot: boolean;
+  
 };
-
 export const ChatBot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showOptions, setShowOptions] = useState(true);
