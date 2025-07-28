@@ -1,0 +1,14 @@
+# netlify.toml
+
+[build]
+  # Comando que a Netlify usará para construir seu site.
+  command = "npm run build"
+
+  # Pasta onde o Next.js gera os arquivos de produção.
+  # Para o Next.js, esta pasta se chama .next
+  publish = ".next"
+
+[[plugins]]
+  # Plugin essencial da Netlify para compatibilidade total com Next.js
+  # (redirecionamentos, SSR, otimização de imagem, etc.)
+  package = "@netlify/plugin-nextjs"
