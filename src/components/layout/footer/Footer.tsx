@@ -21,11 +21,11 @@ const Footer = () => {
               height={60}
               className="h-auto"
             />
-            <span className="text-2xl font-bold">CHAT REQUEST</span>
+            <span className="text-xl font-bold">CHAT REQUEST</span>
           </Link>
           
           <nav>
-            <ul className="flex flex-wrap justify-center gap-6 md:gap-8">
+            <ul className="flex flex-wrap justify-center text-sm  gap-6 md:gap-8">
               <li>
                 <Link href="/signin" className="hover:text-[#64B393] transition-colors duration-300">
                   Acessar

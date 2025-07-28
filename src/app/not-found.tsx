@@ -8,9 +8,9 @@ import Footer from './../components/layout/footer/Footer';
 export default function NotFound() {
   return (
     <div className="h-screen flex flex-col bg-white items-center justify-between w-full">
-      <div className="text-center flex flex-col items-center justify-center flex-1 p-6">
+      <div className="text-center flex flex-col items-center justify-center flex-1 p-3">
         {/* Logo */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-3">
           <Image
             src="/images/ifpe-logo.png"
             alt="logo"
