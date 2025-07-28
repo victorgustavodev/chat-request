@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Button from "@/components/Button";
+import Button from "@/components/button/Button";
 import Image from "next/image";
 
 export default function Home() {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import TextField from "@/components/Field/TextField";
+import TextField from "@/components/field/TextField";
 import Link from "next/link";
 import { useState } from "react";
 import { cadastrarUsuario } from "@/services/userService";

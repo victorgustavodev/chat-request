@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@/components/Button";
-import TextField from "@/components/Field/TextField";
+import Button from "@/components/button/Button";
+import TextField from "@/components/field/TextField";
 import Link from "next/link";
 import { IoDocumentText } from "react-icons/io5";
 
