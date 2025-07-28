@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Button from "@/components/button/Button";
 import Image from "next/image";
-import Footer from './../components/layout/footer/Footer';
+import Footer from '../components/layout/Footer';
 
 export default function NotFound() {
   return (
