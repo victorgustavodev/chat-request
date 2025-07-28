@@ -44,7 +44,7 @@ export default function Home() {
             <div ref={menuRef}>
               <MenuNav isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} />
             </div>
-            <section className="w-full h-full p-6 lg:p-24 justify-between items-center flex flex-col gap-5">
+            <section className="w-full h-full p-6 lg:p-24 justify-evenly items-center flex flex-col gap-5">
               <div className="flex flex-col w-full gap-5 items-center">
                 <div className="flex w-full lg:w-1/2 justify-center items-center">
                   <CardMain />
