@@ -1,4 +1,3 @@
-# Chat-Request
 # 📚 Chat Request
 
 Este sistema tem como objetivo facilitar o processo de solicitação de requerimentos acadêmicos por meio de um *chatbot interativo*, oferecendo aos alunos uma experiência prática, intuitiva e centralizada.
