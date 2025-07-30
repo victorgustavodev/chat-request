@@ -13,6 +13,7 @@ interface TextFieldProps {
   iconRight?: React.ReactNode;
   name?: string;
   className?: string;
+  error?: string;
 }
 
 const TextField: React.FC<TextFieldProps> = ({
@@ -27,6 +28,7 @@ const TextField: React.FC<TextFieldProps> = ({
   iconLeft,
   iconRight,
   name,
+  error,
   className = "",
 }) => {
   return (
@@ -59,7 +61,9 @@ const TextField: React.FC<TextFieldProps> = ({
             text-sm sm:text-base`}
         />
         {iconRight && <span className="text-gray-500">{iconRight}</span>}
+      
       </div>
+      <span className="text-[12px] sm:text-sm text-red-500">{error}</span>
     </div>
   );
 };
