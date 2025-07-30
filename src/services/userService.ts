@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/services/userService.ts
 
 export interface UserData {
@@ -35,4 +36,23 @@ export async function logarUsuario(data: UserData) {
     body: JSON.stringify(data),
   });
   return await response.json();
+}
+
+//Validar Token
+
+export async function validateToken(token: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/validate-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    return data.valid; // O backend deve retornar { valid: true } se o token for válido
+  } catch (error) {
+    return false;
+  }
 }

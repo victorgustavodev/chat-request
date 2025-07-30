@@ -6,6 +6,7 @@ import { CardOption } from "@/components/chat-bot/cards/cardOption";
 import { Navbar } from "@/components/chat-bot/nav/Navbar";
 import { InputMain } from "@/components/chat-bot/input/InputMain";
 import { MenuNav } from './../../components/chat-bot/nav/MenuNav';
+import { validateToken } from '@/services/userService';
 
 export default function Home() {
   const router = useRouter();
@@ -36,13 +37,25 @@ export default function Home() {
     };
   }, [isMenuVisible]);
 
+  //Verifica existência e autenticidade do token
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (!token) {
-      router.push('/signin');
-    } else {
-      setIsAuthChecked(true);
-    }
+    const checkAuth = async () => {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        router.push('/signin');
+        return;
+      }
+      const isValid = await validateToken(token);
+      if (!isValid) {
+        console.log(token)
+        localStorage.removeItem('token');
+        router.push('/signin');
+      } else {
+        router.push('/home');
+        setIsAuthChecked(true);
+      }
+    };
+    checkAuth();
   }, [router]);
 
   if (!isAuthChecked) {
