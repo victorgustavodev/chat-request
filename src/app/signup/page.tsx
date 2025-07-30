@@ -5,6 +5,7 @@ import TextField from "@/components/field/TextField";
 import Link from "next/link";
 import { useState } from "react";
 import { cadastrarUsuario } from "@/services/userService";
+import React from "react";
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -19,10 +20,69 @@ export default function Signup() {
   });
 
   const [mensagem, setMensagem] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  function validarCampos() {
+    const newErrors: { [key: string]: string } = {};
+
+    // Nome
+    if (!form.name.trim()) newErrors.name = "Nome é obrigatório.";
+
+    // Email
+    if (!form.email.trim()) {
+      newErrors.email = "E-mail é obrigatório.";
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email)) {
+      newErrors.email = "E-mail inválido.";
+    }
+
+    // CPF
+    if (!form.cpf.trim()) {
+      newErrors.cpf = "CPF é obrigatório.";
+    } else if (!/^\d{11}$/.test(form.cpf.replace(/\D/g, ""))) {
+      newErrors.cpf = "CPF deve conter 11 dígitos numéricos.";
+    }
+
+    // Telefone
+    if (!form.phone.trim()) {
+      newErrors.phone = "Telefone é obrigatório.";
+    } else if (!/^\d{10,11}$/.test(form.phone.replace(/\D/g, ""))) {
+      newErrors.phone = "Telefone deve conter 10 ou 11 dígitos numéricos.";
+    }
+
+    // Data de nascimento
+    if (!form.birthday.trim()) {
+      newErrors.birthday = "Data de nascimento é obrigatória.";
+    }
+
+    // Senha
+    if (!form.password) {
+      newErrors.password = "Senha é obrigatória.";
+    } else if (
+      !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}/.test(form.password)
+    ) {
+      newErrors.password =
+        "Senha deve ter ao menos 8 caracteres, incluindo maiúsculas, minúsculas, número e caractere especial.";
+    }
+
+    // Confirmação de senha
+    if (form.password_confirmation !== form.password) {
+      newErrors.password_confirmation = "As senhas não coincidem.";
+    }
+
+    return newErrors;
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMensagem("");
+    const validationErrors = validarCampos();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      setMensagem("Por favor, corrija os erros antes de continuar.");
+      return;
+    }
+
     try {
       const response = await cadastrarUsuario(form);
       console.log(response);
@@ -37,6 +97,7 @@ export default function Signup() {
         phone: "",
         user_type: "student",
       });
+      setErrors({});
     } catch (error: any) {
       setMensagem("Erro: " + (error.message || "Não foi possível cadastrar."));
     }
@@ -68,6 +129,7 @@ export default function Signup() {
               value={form.name}
               onChange={(value) => setForm({ ...form, name: value })}
               required
+              error={errors.name}
             />
             <TextField
               label="E-mail"
@@ -76,6 +138,7 @@ export default function Signup() {
               value={form.email}
               onChange={(value) => setForm({ ...form, email: value })}
               required
+              error={errors.email}
             />
             <TextField
               label="CPF"
@@ -85,6 +148,7 @@ export default function Signup() {
               value={form.cpf}
               onChange={(value) => setForm({ ...form, cpf: value })}
               required
+              error={errors.cpf}
             />
             <TextField
               label="Telefone"
@@ -94,6 +158,7 @@ export default function Signup() {
               value={form.phone}
               onChange={(value) => setForm({ ...form, phone: value })}
               required
+              error={errors.phone}
             />
             <TextField
               label="Data de nascimento"
@@ -101,6 +166,7 @@ export default function Signup() {
               value={form.birthday}
               onChange={(value) => setForm({ ...form, birthday: value })}
               required
+              error={errors.birthday}
             />
             <TextField
               label="Senha"
@@ -109,6 +175,7 @@ export default function Signup() {
               value={form.password}
               onChange={(value) => setForm({ ...form, password: value })}
               required
+              error={errors.password}
             />
             <TextField
               label="Confirme a senha"
@@ -117,6 +184,7 @@ export default function Signup() {
               value={form.password_confirmation}
               onChange={(value) => setForm({ ...form, password_confirmation: value })}
               required
+              error={errors.password_confirmation}
             />
 
             <button
