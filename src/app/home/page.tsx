@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CardMain } from "@/components/chat-bot/cards/cardMain";
 import { CardOption } from "@/components/chat-bot/cards/cardOption";
 import { Navbar } from "@/components/chat-bot/nav/Navbar";
@@ -7,8 +8,10 @@ import { InputMain } from "@/components/chat-bot/input/InputMain";
 import { MenuNav } from './../../components/chat-bot/nav/MenuNav';
 
 export default function Home() {
+  const router = useRouter();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
@@ -33,7 +36,22 @@ export default function Home() {
     };
   }, [isMenuVisible]);
 
-  return (
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      router.push('/signin');
+    } else {
+      setIsAuthChecked(true);
+    }
+  }, [router]);
+
+  if (!isAuthChecked) {
+    return <div>
+      Carregando...
+    </div>;
+  }
+
+return (
     <div className="h-screen">
       <div className="flex h-full w-full">
         {/* Sidebar for larger screens */}
@@ -63,4 +81,6 @@ export default function Home() {
       </div>
     </div>
   );
+
+
 }

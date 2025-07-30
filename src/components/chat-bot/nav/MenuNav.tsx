@@ -1,4 +1,5 @@
 import { IoClose } from "react-icons/io5";
+import { useRouter } from 'next/navigation';
 
 type MenuNavProps = {
     isVisible: boolean;
@@ -6,6 +7,11 @@ type MenuNavProps = {
 };
 
 export function MenuNav({ isVisible, onClose }: MenuNavProps) {
+    const router = useRouter();
+    function handleLogout() {
+        localStorage.removeItem('token');
+        router.push('/signin');
+    }
     return (
         <div
             className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transition-transform transform ${
@@ -33,9 +39,9 @@ export function MenuNav({ isVisible, onClose }: MenuNavProps) {
                         </a>
                     </li>
                     <li>
-                        <a href="#" className="text-gray-700 hover:text-gray-900">
+                        <button onClick={handleLogout} className=" cursor-pointer text-gray-700 hover:text-gray-900 w-full text-left">
                             Logout
-                        </a>
+                        </button>
                     </li>
                 </ul>
             </nav>
