@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Button from "@/components/button/Button";
+import Button from "@/components/button";
 import Image from "next/image";
 
 export default function Home() {
@@ -36,7 +36,7 @@ export default function Home() {
           </Link>
 
           <Link href="/signup">
-            <Button className="w-full bg-[#64B393] text-white border-2">
+            <Button className="w-full bg-white text-[#002415] border-2">
               Cadastre-se
             </Button>
           </Link>

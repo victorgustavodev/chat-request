@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import Button from "@/components/button/Button";
+import Button from "@/components/button";
 import TextField from "@/components/field/TextField";
 import Link from "next/link";
-import { IoDocumentText } from "react-icons/io5";
 import { useState } from 'react';
 import { logarUsuario } from "@/services/userService";
 import { useRouter } from 'next/navigation';
@@ -51,26 +49,30 @@ export default function Signin() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Lado esquerdo - visual */}
-      <div className="hidden md:flex flex-col justify-center items-center bg-emerald-600 text-white w-full md:w-1/2 p-8">
+      <div className="hidden md:flex flex-col justify-center items-center bg-[#002415] text-white w-full md:w-1/2 p-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Bem-vindo de volta!</h1>
+          <h1 className="text-4xl font-bold mb-4">Bem Vindo de Volta ao</h1>
+          <h2 className="text-4xl font-bold mb-4">Chat Request!</h2>
           <p className="text-lg max-w-md">
-            Entre para acessar seus requerimentos de forma prática e segura.
+            Faça login para acessar as ferramentas de gerenciamento e consulta de requerimentos.
           </p>
         </div>
+          <img src="/images/aligator_200.png" alt="logo" className="w-40 h-40" />
       </div>
 
       {/* Lado direito - formulário */}
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6">
         <div className="w-full max-w-md">
-          <h2 className="text-2xl font-semibold text-emerald-700 mb-6">Entrar na conta</h2>
 
           <form className="flex flex-col gap-4 bg-white rounded-lg p-6 shadow-md" onSubmit={handleSubmit}>
+          <h2 className="text-2xl font-semibold text-emerald-700 text-center">Entrar na Conta</h2>
+          <p className="text-center text-sm text-gray-600">Para acessar seus requerimentos.</p>
             <TextField
               label="CPF"
-              type="text"
+              type="cpf"
+              MaxLength={14}
               placeholder="000.000.000-00"
-              iconRight={<IoDocumentText />}
+              iconRight={<img src="/images/cpf.svg" alt="CPF" className="w-4 h-4" />}
               required
               value={form.cpf}
               onChange={(value) => setForm((prev) => ({ ...prev, cpf: value }))}
@@ -99,7 +101,7 @@ export default function Signin() {
               </div>
             )}
 
-            <Button className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded">
+            <Button className="bg-[#002415] hover:bg-emerald-900 text-white font-semibold py-[10px] rounded-md">
               Acessar
             </Button>
           </form>

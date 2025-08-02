@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Button from "@/components/button/Button";
+import Button from "@/components/button";
 import Image from "next/image";
 import Footer from '../components/layout/Footer';
 

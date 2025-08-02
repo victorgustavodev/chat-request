@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import TextField from "@/components/field/TextField";
@@ -106,11 +105,13 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Lado esquerdo visual */}
-      <div className="hidden md:flex flex-col justify-center items-center bg-emerald-600 text-white w-full md:w-1/2 p-8">
-        <h1 className="text-4xl font-bold mb-4">Bem-vindo!</h1>
+      <div className="hidden md:flex flex-col justify-center items-center bg-[#002415] text-white w-full md:w-1/2 p-8">
+        <h1 className="text-4xl font-bold mb-4">Bem Vindo ao</h1>
+        <h2 className="text-4xl font-bold mb-4">Chat Request!</h2>
         <p className="text-lg text-center max-w-md">
-          Cadastre-se para acessar sua conta personalizada de forma rápida e segura.
+          Cadastre-se para acessar nosso serviço de gerenciamento e consulta de requerimentos.
         </p>
+        <img src="/images/aligator_200.png" alt="logo" className="w-40 h-40 mt-8" />
       </div>
 
       {/* Lado direito - formulário */}
@@ -120,7 +121,8 @@ export default function Signup() {
             onSubmit={handleSubmit}
             className="bg-white rounded-lg shadow-md p-6 flex flex-col gap-4"
           >
-            <h2 className="text-2xl font-semibold text-emerald-700 mb-2">Criar conta</h2>
+            <h2 className="text-2xl font-semibold text-emerald-700 text-center">Criar Conta</h2>
+            <p className="text-center text-sm text-gray-600 ">Para acessar nosso serviço de forma rápida e segura.</p>
 
             <TextField
               label="Nome"
@@ -129,6 +131,7 @@ export default function Signup() {
               value={form.name}
               onChange={(value) => setForm({ ...form, name: value })}
               required
+              iconRight={<img src="/images/user.svg" alt="Nome" className="w-4 h-4" />}
               error={errors.name}
             />
             <TextField
@@ -138,34 +141,39 @@ export default function Signup() {
               value={form.email}
               onChange={(value) => setForm({ ...form, email: value })}
               required
+              iconRight={<img src="/images/email.svg" alt="E-mail" className="w-4 h-4" />}
               error={errors.email}
             />
             <TextField
               label="CPF"
-              MaxLength={11}
-              type="text"
+              MaxLength={14}
+              type="cpf"
               placeholder="000.000.000-00"
               value={form.cpf}
               onChange={(value) => setForm({ ...form, cpf: value })}
               required
+              iconRight={<img src="/images/cpf.svg" alt="CPF" className="w-4 h-4" />}
               error={errors.cpf}
             />
             <TextField
               label="Telefone"
-              type="text"
-              MaxLength={11}
+              type="phone"
+              MaxLength={15}
               placeholder="(00) 00000-0000"
               value={form.phone}
               onChange={(value) => setForm({ ...form, phone: value })}
               required
+              iconRight={<img src="/images/phone.svg" alt="Telefone" className="w-4 h-4" />}
               error={errors.phone}
             />
             <TextField
               label="Data de nascimento"
-              type="date"
+              type="birthdate"
+              placeholder="dd/mm/aaaa"
               value={form.birthday}
               onChange={(value) => setForm({ ...form, birthday: value })}
               required
+              iconRight={<img src="/images/date.svg" alt="Data" className="w-5 h-5" />}
               error={errors.birthday}
             />
             <TextField
@@ -189,7 +197,7 @@ export default function Signup() {
 
             <button
               type="submit"
-              className="bg-emerald-600 hover:bg-emerald-700 transition-all text-white font-semibold py-2 rounded"
+              className="bg-[#002415] hover:bg-emerald-900 transition-all text-white font-semibold py-2 rounded-md"
             >
               Cadastrar
             </button>

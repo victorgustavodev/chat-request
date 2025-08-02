@@ -1,12 +1,9 @@
 'use client';
 
 import React from 'react';
+import { ButtonProps } from './type';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-}
-
-export default function Button({ children, className = '', ...props }: ButtonProps) {
+function Button({ children, className = '', ...props }: ButtonProps) {
   return (
     <button
       {...props}
@@ -16,3 +13,5 @@ export default function Button({ children, className = '', ...props }: ButtonPro
     </button>
   );
 }
+
+export default Button;
