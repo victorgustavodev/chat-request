@@ -71,36 +71,55 @@ export default function Signup() {
     return newErrors;
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setMensagem("");
-    const validationErrors = validarCampos();
-    setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) {
-      setMensagem("Por favor, corrija os erros antes de continuar.");
-      return;
-    }
+ // Coloque esta função auxiliar fora do seu componente
+function formatarDataParaAPI(data: string): string {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(data)) return data; // Retorna original se não estiver no formato esperado
+  const [dia, mes, ano] = data.split('/');
+  return `${ano}-${mes}-${dia}`;
+}
 
-    try {
-      const response = await cadastrarUsuario(form);
-      console.log(response);
-      setMensagem("Usuário cadastrado com sucesso!");
-      setForm({
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: "",
-        cpf: "",
-        birthday: "",
-        phone: "",
-        user_type: "student",
-      });
-      setErrors({});
-    } catch (error: any) {
-      setMensagem("Erro: " + (error.message || "Não foi possível cadastrar."));
-    }
+// Dentro do seu componente Signup
+async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+  setMensagem("");
+  const validationErrors = validarCampos();
+  setErrors(validationErrors);
+
+  if (Object.keys(validationErrors).length > 0) {
+    setMensagem("Por favor, corrija os erros antes de continuar.");
+    return;
   }
+
+  // Crie um payload com os dados formatados corretamente
+  const payload = {
+    ...form,
+    cpf: form.cpf.replace(/\D/g, ""), // Remove a máscara do CPF
+    phone: form.phone.replace(/\D/g, ""), // Remove a máscara do telefone
+    birthday: formatarDataParaAPI(form.birthday), // Converte a data
+  };
+
+  try {
+    const response = await cadastrarUsuario(payload); // Envia o payload formatado
+    console.log(response);
+    setMensagem("Usuário cadastrado com sucesso!");
+    // Limpa o formulário após o sucesso
+    setForm({
+      name: "",
+      email: "",
+      password: "",
+      password_confirmation: "",
+      cpf: "",
+      birthday: "",
+      phone: "",
+      user_type: "student",
+    });
+    setErrors({});
+  } catch (error: any) {
+    // Agora o catch receberá os erros da API
+    setMensagem("Erro: " + (error.message || "Não foi possível cadastrar."));
+  }
+}
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
