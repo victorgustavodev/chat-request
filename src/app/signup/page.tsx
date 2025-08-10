@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import TextField from "@/components/field/TextField";
@@ -222,7 +224,7 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
             </button>
 
             {mensagem && (
-              <p className="text-sm text-center text-emerald-700 font-medium mt-2">
+              <p className={`text-center text-sm ${mensagem.startsWith('Erro') ? 'text-red-600' : 'text-emerald-600'} mt-2`}>
                 {mensagem}
               </p>
             )}

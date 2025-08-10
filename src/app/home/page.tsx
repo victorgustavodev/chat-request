@@ -38,31 +38,48 @@ export default function Home() {
   }, [isMenuVisible]);
 
   //Verifica existência e autenticidade do token
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      if (!token) {
-        router.push('/signin');
-        return;
-      }
+useEffect(() => {
+  const checkAuth = async () => {
+    const token = localStorage.getItem('token');
+
+    // Se não houver token, redireciona para o login
+    if (!token) {
+      router.push('/signin');
+      return; // Interrompe a execução
+    }
+
+    try {
       const isValid = await validateToken(token);
+
       if (!isValid) {
-        console.log(token)
+        // Se o token for inválido, limpa e redireciona
         localStorage.removeItem('token');
         router.push('/signin');
       } else {
-        router.push('/home');
+        // Se o token for VÁLIDO, apenas atualiza o estado para mostrar a página.
+        // NÃO redirecione para a mesma página.
         setIsAuthChecked(true);
       }
-    };
-    checkAuth();
-  }, [router]);
+    } catch (error) {
+      // Se a validação der erro (ex: problema de rede), trata como inválido
+      console.error("Erro ao validar token:", error);
+      localStorage.removeItem('token');
+      router.push('/signin');
+    }
+  };
 
-  if (!isAuthChecked) {
-    return <div>
+  checkAuth();
+}, []);
+
+
+if (!isAuthChecked) {
+  // Tela de carregamento enquanto o token é verificado
+  return (
+    <div className="flex h-screen w-full items-center justify-center bg-[#002415] text-white">
       Carregando...
-    </div>;
-  }
+    </div>
+  );
+}
 
 return (
     <div className="h-screen">

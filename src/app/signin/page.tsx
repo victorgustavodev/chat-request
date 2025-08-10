@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Button from "@/components/button";
@@ -17,35 +19,38 @@ export default function Signin() {
 
   const router = useRouter();
 
+// ... (seus imports e o início do componente)
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMensagem("");
+
     try {
+      // 1. Limpa a máscara do CPF antes de enviar
+      const cpfLimpo = form.cpf.replace(/\D/g, "");
+
+      // 2. Envia apenas os dados necessários para a função
       const response = await logarUsuario({
-        cpf: form.cpf,
+        cpf: cpfLimpo,
         password: form.password,
-        name: "",
-        email: "",
-        password_confirmation: "",
-        birthday: "",
-        phone: "",
-        user_type: "",
       });
+
+      // 3. Verifica se a resposta contém o token e o salva
       if (response && response.token) {
-        localStorage.setItem('token', response.token);
+        localStorage.setItem('token', response.token); // Salva o token
         setMensagem("Login realizado com sucesso!");
-        setForm({
-          cpf: "",
-          password: "",
-        });
-        router.push('/home');
+        router.push('/home'); // Redireciona para a página principal
       } else {
-        setMensagem("Erro: Token não recebido.");
+        // Fallback caso a API dê sucesso mas não retorne um token
+        setMensagem("Erro: Token não recebido do servidor.");
       }
     } catch (error: any) {
-      setMensagem("Erro: " + (error.message || "Não foi possível Logar."));
+      // O 'catch' agora exibirá a mensagem de erro vinda diretamente da API
+      setMensagem(`Erro: ${error.message}`);
     }
   }
+
+// ... (resto do seu return JSX)
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Lado esquerdo - visual */}
