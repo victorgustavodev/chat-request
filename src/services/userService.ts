@@ -12,6 +12,13 @@ export interface UserData {
   user_type: string;
 }
 
+export interface ApiRequerimento {
+  protocol: number;
+  status: string;
+  observations: string;
+  enrollment: string;
+}
+
 interface LoginData {
   cpf: string;
   password: string;
@@ -83,4 +90,39 @@ export async function validateToken(token: string): Promise<boolean> {
     console.error("Falha na requisição para /api/validate-token:", error);
     return false;
   }
+}
+
+export async function listarRequerimentos(): Promise<ApiRequerimento[]> {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado. Por favor, faça login novamente.');
+  }
+
+  const response = await fetch('http://127.0.0.1:8000/api/list-requests', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    // Se o token for inválido, a API geralmente retorna 401
+    if (response.status === 401) {
+       throw new Error('Sua sessão expirou. Por favor, faça login novamente.');
+    }
+    throw new Error('Falha ao buscar os requerimentos do servidor.');
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+
+export async function cadastrarRequerimento(data: ApiRequerimento) {
+  const response = await fetch("http://127.0.0.1:8000/api/requerimentos", {
+    method: "POST",
+  });
 }

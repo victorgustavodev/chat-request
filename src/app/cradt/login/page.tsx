@@ -14,8 +14,7 @@ export default function SigninCradt() {
       {/* Lado esquerdo */}
       <div className="hidden md:flex flex-col justify-center items-center bg-emerald-950 text-white w-full md:w-1/2 p-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Bem Vindo de Volta</h1>
-          <h2 className="text-4xl font-bold mb-4">ao Chat Request, CRADT!</h2>
+          <h2 className="text-4xl font-bold mb-4">CRADT</h2>
           <p className="text-lg max-w-md">
             Faça login para acessar as ferramentas de gerenciamento e consulta de requerimentos.
           </p>

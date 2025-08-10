@@ -2,12 +2,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useEffect } from 'react';
 import Button from "@/components/button";
 import TextField from "@/components/field/TextField";
 import Link from "next/link";
 import { useState } from 'react';
 import { logarUsuario } from "@/services/userService";
 import { useRouter } from 'next/navigation';
+import { validateToken } from '@/services/userService';
 
 export default function Signin() {
   const [form, setForm] = useState({
@@ -20,7 +22,38 @@ export default function Signin() {
   const router = useRouter();
 
 // ... (seus imports e o início do componente)
+useEffect(() => {
+  const checkAuth = async () => {
+    const token = localStorage.getItem('token');
 
+    // Se não houver token, redireciona para o login
+    if (token) {
+      router.push('/home');
+      return; // Interrompe a execução
+    }
+
+    try {
+      const isValid = await validateToken(token);
+
+      if (!isValid) {
+        // Se o token for inválido, limpa e redireciona
+        localStorage.removeItem('token');
+        router.push('/signin');
+      } else {
+        // Se o token for VÁLIDO, apenas atualiza o estado para mostrar a página.
+        // NÃO redirecione para a mesma página.
+        setIsAuthChecked(true);
+      }
+    } catch (error) {
+      // Se a validação der erro (ex: problema de rede), trata como inválido
+      console.error("Erro ao validar token:", error);
+      localStorage.removeItem('token');
+      router.push('/signin');
+    }
+  };
+
+  checkAuth();
+}, []);
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMensagem("");
