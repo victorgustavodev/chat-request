@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
@@ -154,7 +155,7 @@ export default function DashboardPage() {
                   <th className="px-4 py-3 text-left font-semibold">Protocolo</th>
                   <th className="px-4 py-3 text-left font-semibold">Status</th>
                   <th className="px-4 py-3 text-left font-semibold">Matrícula</th>
-                  <th className="px-4 py-3 text-left font-semibold">Observações</th>
+                  <th className="px-4 py-3 text-left font-semibold">Data de Criação</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
