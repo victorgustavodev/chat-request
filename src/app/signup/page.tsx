@@ -112,6 +112,7 @@ export default function Signup() {
               onChange={(value) => setForm({ ...form, name: value })}
               required
               error={errors.nome_completo ? errors.nome_completo[0] : undefined}
+              iconRight={<img src="/images/user.svg" alt="User" className="w-4 h-4" />}
             />
             <TextField
               label="E-mail"
@@ -121,6 +122,7 @@ export default function Signup() {
               onChange={(value) => setForm({ ...form, email: value })}
               required
               error={errors.email ? errors.email[0] : undefined}
+              iconRight={<img src="/images/email.svg" alt="Email" className="w-4 h-4" />}
             />
             <TextField
               label="CPF"
@@ -141,7 +143,7 @@ export default function Signup() {
               value={form.phone}
               onChange={(value) => setForm({ ...form, phone: value })}
               error={errors.telefone ? errors.telefone[0] : undefined}
-              iconRight={<img src="/images/phone.svg" alt="CPF" className="w-4 h-4" />}
+              iconRight={<img src="/images/phone.svg" alt="telefone" className="w-4 h-4" />}
             />
             <TextField
               label="Nº Identidade (RG)"
@@ -151,6 +153,7 @@ export default function Signup() {
               onChange={(value) => setForm({ ...form, identidade: value })}
               required
               error={errors.identidade ? errors.identidade[0] : undefined}
+              iconRight={<img src="/images/rg.svg" alt="RG" className="w-4 h-4" />}
             />
             <TextField
               label="Órgão Expedidor"
@@ -160,6 +163,7 @@ export default function Signup() {
               onChange={(value) => setForm({ ...form, orgao_expedidor: value })}
               required
               error={errors.orgao_expedidor ? errors.orgao_expedidor[0] : undefined}
+              iconRight={<img src="/images/sds.svg" alt="SDS" className="w-4 h-4" />}
             />
             <TextField
               label="Senha"

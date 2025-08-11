@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
@@ -6,10 +7,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HiMenu } from 'react-icons/hi';
 import DialogAlert from '@/components/dialogAlert';
-// Assumindo que a função no seu service se chama listarTodosRequerimentos
 import { listarTodosRequerimentos } from '@/services/userService';
 
-// 1. Interface atualizada para corresponder 100% ao JSON da sua API
 interface ApiRequerimento {
   id_requerimento: number;
   protocolo: string;
@@ -26,7 +25,6 @@ interface ApiRequerimento {
   };
 }
 
-// Função auxiliar para formatar a data
 const formatarData = (dataString: string) => {
   const data = new Date(dataString);
   return data.toLocaleDateString('pt-BR', {
@@ -50,23 +48,15 @@ export default function DashboardPage() {
       try {
         setIsLoading(true);
         setError(null);
-        
-        // Supondo que você salve o token do admin no localStorage
-        // const adminToken = localStorage.getItem('admin_token');
-        // if (!adminToken) {
-        //     throw new Error('Token de administrador não encontrado. Faça login como admin.');
-        // }
 
         const dadosDaApi = await listarTodosRequerimentos();
-        
-        // 2. A API retorna um objeto de paginação, os dados estão na chave 'data'
-        setRequerimentos(dadosDaApi.data);
 
+        setRequerimentos(dadosDaApi.data);
       } catch (err: any) {
         setError(err.message || 'Ocorreu um erro desconhecido.');
         if (err.message.includes('Token') || err.message.includes('autorizado')) {
           setTimeout(() => {
-            router.push('/login-adm'); // Redireciona para o login de admin
+            router.push('/login-adm');
           }, 3000);
         }
       } finally {
@@ -83,7 +73,7 @@ export default function DashboardPage() {
 
   const confirmLogout = () => {
     setDialogOpen(false);
-    localStorage.removeItem('admin_token'); // Limpa o token do admin
+    localStorage.removeItem('admin_token');
     router.push('/login-adm');
   };
 
@@ -110,10 +100,14 @@ export default function DashboardPage() {
     );
   }
 
+  const handleRowClick = (id: number) => {
+    router.push(`/requerimentos/${id}`);
+  };
+
   return (
     <>
       <div className="min-h-screen flex flex-col md:flex-row">
-        {/* --- SIDebar para Desktop --- */}
+        {/* Sidebar para Desktop */}
         <aside
           className={`hidden md:flex ${
             sidebarOpen ? 'w-64' : 'w-16'
@@ -135,18 +129,22 @@ export default function DashboardPage() {
             </button>
             {sidebarOpen && <div className="border-t border-white/30 mb-4" />}
             <nav className="flex flex-col gap-4">
-                {/* Links da Navegação */}
+              {/* Links da Navegação */}
             </nav>
           </div>
           <button
             onClick={handleLogoutClick}
             className="hover:bg-emerald-800 text-white p-2 rounded transition whitespace-nowrap flex items-center gap-2"
           >
-            {sidebarOpen ? 'Sair' : <img src="/images/logout.svg" alt="logout" width={16} height={16} />}
+            {sidebarOpen ? (
+              'Sair'
+            ) : (
+              <img src="/images/logout.svg" alt="logout" width={16} height={16} />
+            )}
           </button>
         </aside>
 
-        {/* --- Header para Mobile --- */}
+        {/* Header para Mobile */}
         <header className="flex md:hidden items-center justify-between bg-[#002415] text-white px-4 py-3">
           <img src="/images/aligator_200.png" alt="logo" width={40} height={40} />
           <h1 className="text-lg font-bold">CRADT</h1>
@@ -155,10 +153,10 @@ export default function DashboardPage() {
           </button>
         </header>
 
-        {/* --- Menu Mobile --- */}
+        {/* Menu Mobile */}
         {menuOpen && (
           <div className="md:hidden bg-[#002415] text-white p-4 flex flex-col gap-4">
-              {/* Links da Navegação Mobile */}
+            {/* Links da Navegação Mobile */}
             <button
               onClick={handleLogoutClick}
               className="hover:bg-emerald-800 p-2 rounded transition text-left"
@@ -168,7 +166,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* --- Conteúdo Principal --- */}
+        {/* Conteúdo Principal */}
         <main className="flex-1 p-4 sm:p-6 bg-gray-50">
           <h1 className="text-2xl font-bold text-emerald-700 mb-4">Lista de Requerimentos</h1>
           <div className="overflow-x-auto bg-white rounded-lg shadow-md">
@@ -185,19 +183,24 @@ export default function DashboardPage() {
               <tbody className="divide-y divide-gray-100">
                 {requerimentos.length > 0 ? (
                   requerimentos.map((req) => (
-                    <tr 
-                    key={req.id_requerimento} 
-                    className="hover:bg-gray-100 transition"
-                    onClick={() => router.push(`/cradt/dashboard/${req.id_requerimento}`)}>
-                      {/* 3. Células da tabela usando os dados aninhados da API */}
+                    <tr
+                      key={req.id_requerimento}
+                      className="hover:bg-gray-100 transition cursor-pointer"
+                      onClick={() => handleRowClick(req.id_requerimento)}
+                    >
                       <td className="px-4 py-3 font-mono">{req.protocolo}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          req.status === 'Deferido' ? 'bg-green-100 text-green-800' :
-                          req.status === 'Indeferido' ? 'bg-red-100 text-red-800' :
-                          req.status === 'Aberto' ? 'bg-blue-100 text-blue-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            req.status === 'Deferido'
+                              ? 'bg-green-100 text-green-800'
+                              : req.status === 'Indeferido'
+                              ? 'bg-red-100 text-red-800'
+                              : req.status === 'Aberto'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
                           {req.status}
                         </span>
                       </td>
