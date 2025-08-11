@@ -1,4 +1,3 @@
-// file: components/MinhasMatriculas.tsx
 
 "use client"; // ESSENCIAL: Marca este como um Componente de Cliente
 
