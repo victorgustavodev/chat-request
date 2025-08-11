@@ -49,13 +49,13 @@ export default function SigninCradt() {
               required
             />
 
-            <div className="flex justify-end">
-              <Link href="/recuperar-senha">
+            {/* <div className="flex justify-end">
+              <Link href={}>
                 <span className="text-sm text-emerald-600 hover:underline">
                   Esqueceu a senha?
                 </span>
               </Link>
-            </div>
+            </div> */}
 
             <Button className="bg-[#002415] hover:bg-emerald-900 text-white font-semibold py-[10px] rounded-md">
               Acessar

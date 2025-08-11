@@ -6,49 +6,76 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HiMenu } from 'react-icons/hi';
 import DialogAlert from '@/components/dialogAlert';
-// Importe a função e o tipo do seu arquivo de serviço
-import { listarRequerimentos, ApiRequerimento } from '@/services/userService';
+// Assumindo que a função no seu service se chama listarTodosRequerimentos
+import { listarTodosRequerimentos } from '@/services/userService';
+
+// 1. Interface atualizada para corresponder 100% ao JSON da sua API
+interface ApiRequerimento {
+  id_requerimento: number;
+  protocolo: string;
+  status: string;
+  created_at: string;
+  matricula: {
+    numero_matricula: string;
+    aluno: {
+      nome_completo: string;
+    };
+  };
+  tipo_requerimento: {
+    nome_requerimento: string;
+  };
+}
+
+// Função auxiliar para formatar a data
+const formatarData = (dataString: string) => {
+  const data = new Date(dataString);
+  return data.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+};
 
 export default function DashboardPage() {
-  // Estado para os requerimentos, agora usando o tipo da API
   const [requerimentos, setRequerimentos] = useState<ApiRequerimento[]>([]);
-  // Estados para controlar o carregamento e erros da API
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Estados existentes para o controle da UI
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
 
-  // useEffect para buscar os dados da API quando o componente carregar
   useEffect(() => {
     async function carregarDados() {
       try {
-        // Define o estado inicial antes da chamada
         setIsLoading(true);
         setError(null);
         
-        const dadosDaApi = await listarRequerimentos();
-        setRequerimentos(dadosDaApi);
+        // Supondo que você salve o token do admin no localStorage
+        // const adminToken = localStorage.getItem('admin_token');
+        // if (!adminToken) {
+        //     throw new Error('Token de administrador não encontrado. Faça login como admin.');
+        // }
+
+        const dadosDaApi = await listarTodosRequerimentos();
+        
+        // 2. A API retorna um objeto de paginação, os dados estão na chave 'data'
+        setRequerimentos(dadosDaApi.data);
 
       } catch (err: any) {
         setError(err.message || 'Ocorreu um erro desconhecido.');
-        // Se o erro for de autenticação, redireciona para o login após um tempo
-        if (err.message.includes('Token') || err.message.includes('sessão')) {
+        if (err.message.includes('Token') || err.message.includes('autorizado')) {
           setTimeout(() => {
-            router.push('/signin');
+            router.push('/login-adm'); // Redireciona para o login de admin
           }, 3000);
         }
       } finally {
-        // Garante que o estado de carregamento seja desativado ao final
         setIsLoading(false);
       }
     }
 
     carregarDados();
-  }, [router]); // Dependência do router para o redirecionamento
+  }, [router]);
 
   const handleLogoutClick = () => {
     setDialogOpen(true);
@@ -56,15 +83,14 @@ export default function DashboardPage() {
 
   const confirmLogout = () => {
     setDialogOpen(false);
-    localStorage.removeItem('token'); // Limpa o token ao sair
-    router.push('/signin');
+    localStorage.removeItem('admin_token'); // Limpa o token do admin
+    router.push('/login-adm');
   };
 
   const cancelLogout = () => {
     setDialogOpen(false);
   };
 
-  // Se estiver carregando, mostra uma mensagem de carregamento
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
@@ -75,17 +101,15 @@ export default function DashboardPage() {
     );
   }
 
-  // Se ocorrer um erro, mostra a mensagem de erro
   if (error) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="flex h-screen flex-col items-center justify-center bg-gray-50 p-4 text-center">
         <p className="text-xl font-bold text-red-600">Ocorreu um Erro</p>
         <p className="text-md text-gray-700">{error}</p>
       </div>
     );
   }
 
-  // Se tudo ocorrer bem, renderiza a dashboard
   return (
     <>
       <div className="min-h-screen flex flex-col md:flex-row">
@@ -111,7 +135,7 @@ export default function DashboardPage() {
             </button>
             {sidebarOpen && <div className="border-t border-white/30 mb-4" />}
             <nav className="flex flex-col gap-4">
-               {/* Links da Navegação */}
+                {/* Links da Navegação */}
             </nav>
           </div>
           <button
@@ -134,7 +158,7 @@ export default function DashboardPage() {
         {/* --- Menu Mobile --- */}
         {menuOpen && (
           <div className="md:hidden bg-[#002415] text-white p-4 flex flex-col gap-4">
-             {/* Links da Navegação Mobile */}
+              {/* Links da Navegação Mobile */}
             <button
               onClick={handleLogoutClick}
               className="hover:bg-emerald-800 p-2 rounded transition text-left"
@@ -145,33 +169,43 @@ export default function DashboardPage() {
         )}
 
         {/* --- Conteúdo Principal --- */}
-        <main className="flex-1 p-4 bg-gray-50">
+        <main className="flex-1 p-4 sm:p-6 bg-gray-50">
           <h1 className="text-2xl font-bold text-emerald-700 mb-4">Lista de Requerimentos</h1>
           <div className="overflow-x-auto bg-white rounded-lg shadow-md">
             <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-emerald-600 text-white">
                 <tr>
-                  {/* Cabeçalhos da tabela ajustados para os dados da API */}
                   <th className="px-4 py-3 text-left font-semibold">Protocolo</th>
                   <th className="px-4 py-3 text-left font-semibold">Status</th>
-                  <th className="px-4 py-3 text-left font-semibold">Matrícula</th>
+                  <th className="px-4 py-3 text-left font-semibold">Aluno</th>
+                  <th className="px-4 py-3 text-left font-semibold">Tipo de Requerimento</th>
                   <th className="px-4 py-3 text-left font-semibold">Data de Criação</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {requerimentos.length > 0 ? (
                   requerimentos.map((req) => (
-                    <tr key={req.protocol} className="hover:bg-gray-100 transition">
-                      {/* Células da tabela usando os nomes de campos da API */}
-                      <td className="px-4 py-2">{req.protocol}</td>
-                      <td className="px-4 py-2">{req.status}</td>
-                      <td className="px-4 py-2">{req.enrollment}</td>
-                      <td className="px-4 py-2">{req.observations}</td>
+                    <tr key={req.id_requerimento} className="hover:bg-gray-100 transition">
+                      {/* 3. Células da tabela usando os dados aninhados da API */}
+                      <td className="px-4 py-3 font-mono">{req.protocolo}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          req.status === 'Deferido' ? 'bg-green-100 text-green-800' :
+                          req.status === 'Indeferido' ? 'bg-red-100 text-red-800' :
+                          req.status === 'Aberto' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {req.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">{req.matricula.aluno.nome_completo}</td>
+                      <td className="px-4 py-3">{req.tipo_requerimento.nome_requerimento}</td>
+                      <td className="px-4 py-3">{formatarData(req.created_at)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="text-center py-8 text-gray-500">
+                    <td colSpan={5} className="text-center py-8 text-gray-500">
                       Nenhum requerimento encontrado.
                     </td>
                   </tr>

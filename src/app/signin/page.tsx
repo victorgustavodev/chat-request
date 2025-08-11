@@ -69,8 +69,8 @@ useEffect(() => {
       });
 
       // 3. Verifica se a resposta contém o token e o salva
-      if (response && response.token) {
-        localStorage.setItem('token', response.token); // Salva o token
+      if (response && response.access_token) {
+        localStorage.setItem('token', response.access_token); // Salva o token
         setMensagem("Login realizado com sucesso!");
         router.push('/home'); // Redireciona para a página principal
       } else {
@@ -124,14 +124,14 @@ useEffect(() => {
               value={form.password}
               onChange={(value) => setForm((prev) => ({ ...prev, password: value }))}
             />
-
+{/* 
             <div className="flex justify-end">
               <Link href="/recuperar-senha">
                 <span className="text-sm text-emerald-600 hover:underline">
                   Esqueceu a senha?
                 </span>
               </Link>
-            </div>
+            </div> */}
 
             {mensagem && (
               <div className={`text-center text-sm ${mensagem.startsWith('Erro') ? 'text-red-600' : 'text-emerald-600'} mt-2`}>

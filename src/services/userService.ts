@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { listarRequerimentos } from '@/services/userService';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/services/userService.ts
 
@@ -25,12 +27,12 @@ interface LoginData {
 }
 
 export async function listarUsuarios() {
-  const response = await fetch("http://127.0.0.1:8000/api/users");
+  const response = await fetch("http://127.0.0.1:8000/api/v1/alunos");
   return await response.json();
 }
 
 export async function cadastrarUsuario(data: UserData) {
-  const response = await fetch("http://127.0.0.1:8000/api/register", {
+  const response = await fetch("http://127.0.0.1:8000/api/v1/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,7 +51,7 @@ export async function cadastrarUsuario(data: UserData) {
 }
 
 export async function logarUsuario(data: LoginData) {
-  const response = await fetch("http://127.0.0.1:8000/api/login", {
+  const response = await fetch("http://127.0.0.1:8000/api/v1/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -70,12 +72,32 @@ export async function logarUsuario(data: LoginData) {
   return responseData;
 }
 
-//Validar Token
+export async function getMinhasMatriculas(): Promise<any[]> {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    // Se não houver token, não há como buscar os dados
+    throw new Error('Token de autenticação não encontrado.');
+  }
 
+  const response = await fetch('http://127.0.0.1:8000/api/v1/my-registrations', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Falha ao buscar suas matrículas.');
+  }
+
+  return response.json();
+}
 
 export async function validateToken(token: string): Promise<boolean> {
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/validate-token", {
+    const response = await fetch("http://127.0.0.1:8000/api/v1/validate-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -87,42 +109,65 @@ export async function validateToken(token: string): Promise<boolean> {
     return response.ok;
 
   } catch (error) {
-    console.error("Falha na requisição para /api/validate-token:", error);
+    console.error("Falha na requisição para /api/v1/validate-token:", error);
     return false;
   }
 }
 
-export async function listarRequerimentos(): Promise<ApiRequerimento[]> {
+export async function getTiposRequerimento(): Promise<any[]> {
   const token = localStorage.getItem('token');
+  if (!token) throw new Error('Token de autenticação não encontrado.');
 
-  if (!token) {
-    throw new Error('Token de autenticação não encontrado. Por favor, faça login novamente.');
-  }
-
-  const response = await fetch('http://127.0.0.1:8000/api/list-requests', {
-    method: 'GET',
+  const response = await fetch('http://127.0.0.1:8000/api/v1/tipos-requerimento', {
     headers: {
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
   });
 
-  if (!response.ok) {
-    // Se o token for inválido, a API geralmente retorna 401
-    if (response.status === 401) {
-       throw new Error('Sua sessão expirou. Por favor, faça login novamente.');
-    }
-    throw new Error('Falha ao buscar os requerimentos do servidor.');
-  }
-
-  const data = await response.json();
-  return data;
+  if (!response.ok) throw new Error('Falha ao buscar os tipos de requerimento.');
+  return response.json();
 }
 
+export async function cadastrarRequerimento(formData: FormData) {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('Token de autenticação não encontrado.');
 
-export async function cadastrarRequerimento(data: ApiRequerimento) {
-  const response = await fetch("http://127.0.0.1:8000/api/requerimentos", {
+  const response = await fetch("http://127.0.0.1:8000/api/v1/requerimentos", {
     method: "POST",
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: formData, // Envia como FormData para suportar arquivos
   });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const firstError = errorData.errors ? Object.values(errorData.errors)[0][0] : null;
+    throw new Error(firstError || errorData.message || "Ocorreu um erro na solicitação.");
+  }
+
+  return response.json();
+}
+
+export async function listarTodosRequerimentos(): Promise<any> {
+
+
+  const response = await fetch('http://127.0.0.1:8000/api/requerimentos', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Não autorizado. Verifique se o token de admin é válido.');
+    }
+    throw new Error('Falha ao buscar a lista de requerimentos.');
+  }
+
+  return response.json();
 }

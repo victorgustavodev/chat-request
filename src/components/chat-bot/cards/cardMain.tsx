@@ -7,7 +7,7 @@ export function CardMain(props: { bodyText?: string }) {
       w-full 
       max-w-2xl 
       bg-white 
-      rounded-xl // Bordas mais suaves
+      rounded-2xl // Bordas mais suaves
       shadow-lg // Sombra um pouco mais pronunciada
       p-4 sm:p-6  // Padding responsivo e consistente
       flex 
