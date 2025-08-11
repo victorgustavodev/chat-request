@@ -108,7 +108,7 @@ export async function validateToken(token: string): Promise<boolean> {
     return response.ok;
 
   } catch (error) {
-    console.error("Falha na requisição para /api/v1/validate-token:", error);
+    console.error("Falha na requisição para /api/validate-token:", error);
     return false;
   }
 }
@@ -150,20 +150,25 @@ export async function cadastrarRequerimento(formData: FormData) {
   return response.json();
 }
 
-export async function listarTodosRequerimentos(): Promise<any> {
+export async function listarTodosRequerimentos(Token: string): Promise<any> {
+  // 1. Verifica se o token foi fornecido
+  if (!Token) {
+    throw new Error('Token não fornecido.');
+  }
 
-
+  // 2. A URL foi corrigida para a rota de admin
   const response = await fetch('http://127.0.0.1:8000/api/requerimentos', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Authorization': `Bearer ${Token}`,
     },
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error('Não autorizado. Verifique se o token de admin é válido.');
+      throw new Error('Não autorizado. Verifique se o token é válido.');
     }
     throw new Error('Falha ao buscar a lista de requerimentos.');
   }

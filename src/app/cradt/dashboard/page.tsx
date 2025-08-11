@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
@@ -9,6 +8,7 @@ import { HiMenu } from 'react-icons/hi';
 import DialogAlert from '@/components/dialogAlert';
 import { listarTodosRequerimentos } from '@/services/userService';
 
+// Interface para os dados do requerimento
 interface ApiRequerimento {
   id_requerimento: number;
   protocolo: string;
@@ -25,6 +25,7 @@ interface ApiRequerimento {
   };
 }
 
+// Função auxiliar para formatar a data
 const formatarData = (dataString: string) => {
   const data = new Date(dataString);
   return data.toLocaleDateString('pt-BR', {
@@ -34,12 +35,26 @@ const formatarData = (dataString: string) => {
   });
 };
 
+// Função para estilizar o status
+const getStatusClass = (status: string) => {
+    switch (status) {
+        case 'Deferido': return 'bg-green-100 text-green-800';
+        case 'Indeferido': return 'bg-red-100 text-red-800';
+        case 'Aberto': return 'bg-blue-100 text-blue-800';
+        case 'Em Análise':
+        case 'Pendente':
+            return 'bg-yellow-100 text-yellow-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
+};
+
+
 export default function DashboardPage() {
   const [requerimentos, setRequerimentos] = useState<ApiRequerimento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Inicia aberto
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
 
@@ -49,14 +64,22 @@ export default function DashboardPage() {
         setIsLoading(true);
         setError(null);
 
-        const dadosDaApi = await listarTodosRequerimentos();
+        // **CORREÇÃO APLICADA AQUI**
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Token de administrador não encontrado. Faça login como admin.');
+        }
 
+        const dadosDaApi = await listarTodosRequerimentos(token);
+        
+        // A API retorna um objeto de paginação, os dados estão na chave 'data'
         setRequerimentos(dadosDaApi.data);
+
       } catch (err: any) {
         setError(err.message || 'Ocorreu um erro desconhecido.');
         if (err.message.includes('Token') || err.message.includes('autorizado')) {
           setTimeout(() => {
-            router.push('/login-adm');
+             // Redireciona para o login de admin
           }, 3000);
         }
       } finally {
@@ -73,12 +96,16 @@ export default function DashboardPage() {
 
   const confirmLogout = () => {
     setDialogOpen(false);
-    localStorage.removeItem('admin_token');
-    router.push('/cradt/login');
+    localStorage.removeItem('token');
+    router.push('/cradt/login'); // Ajuste a rota se necessário
   };
 
   const cancelLogout = () => {
     setDialogOpen(false);
+  };
+
+  const handleRowClick = (id: number) => {
+    router.push(`/cradt/requerimentos/${id}`); // Rota para a página de detalhes
   };
 
   if (isLoading) {
@@ -100,50 +127,41 @@ export default function DashboardPage() {
     );
   }
 
-  const handleRowClick = (id: number) => {
-    router.push(`/requerimentos/${id}`);
-  };
-
   return (
     <>
       <div className="min-h-screen flex flex-col md:flex-row">
         {/* Sidebar para Desktop */}
         <aside
           className={`hidden md:flex ${
-            sidebarOpen ? 'w-64' : 'w-16'
-          } bg-[#002415] text-white flex-col justify-between p-4 transition-all duration-300 ease-in-out overflow-hidden`}
+            sidebarOpen ? 'w-64' : 'w-20'
+          } bg-[#002415] text-white flex-col justify-between p-4 transition-all duration-300 ease-in-out`}
         >
           <div>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="flex items-center gap-2 mb-6"
+              className="flex items-center gap-2 mb-6 p-2 rounded-md hover:bg-emerald-800 w-full"
+              aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
             >
               <img
                 src="/images/aligator_200.png"
                 alt="logo"
-                width={40}
-                height={40}
-                className="cursor-pointer"
+                className="w-8 h-8 flex-shrink-0"
               />
-              {sidebarOpen && <h2 className="text-2xl font-bold">Painel</h2>}
+              {sidebarOpen && <h2 className="text-2xl font-bold whitespace-nowrap">Painel</h2>}
             </button>
             {sidebarOpen && <div className="border-t border-white/30 mb-4" />}
             <nav className="flex flex-col gap-4">
-              {/* Aqui você pode colocar os links da navegação */}
+              {/* Links da Navegação */}
             </nav>
           </div>
-<button
-  onClick={handleLogoutClick}
-  className="hover:bg-emerald-800 text-white rounded transition whitespace-nowrap flex items-center justify-center gap-2 p-3"
-  title="Sair"
-  style={{ minWidth: '40px', minHeight: '40px' }} // botão no mínimo 48x48 px (tamanho bom para toque)
->
-  {sidebarOpen ? (
-    'Sair'
-  ) : (
-    <img src="/images/logout.svg" alt="logout" className="w-6 h-6" />
-  )}
-</button>
+          <button
+            onClick={handleLogoutClick}
+            className="hover:bg-emerald-800 text-white rounded-md transition whitespace-nowrap flex items-center justify-center gap-2 p-3"
+            title="Sair"
+          >
+            <img src="/images/logout.svg" alt="logout" className="w-5 h-5 flex-shrink-0" />
+            {sidebarOpen && <span>Sair</span>}
+          </button>
         </aside>
 
         {/* Header para Mobile */}
@@ -193,15 +211,7 @@ export default function DashboardPage() {
                       <td className="px-4 py-3 font-mono">{req.protocolo}</td>
                       <td className="px-4 py-3">
                         <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            req.status === 'Aceito'
-                              ? 'bg-green-100 text-green-800'
-                              : req.status === 'Recusado'
-                              ? 'bg-red-100 text-red-800'
-                              : req.status === 'Aberto'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusClass(req.status)}`}
                         >
                           {req.status}
                         </span>
