@@ -14,7 +14,7 @@ export function MenuNav({ isVisible, onClose }: MenuNavProps) {
     }
     return (
         <div
-            className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transition-transform transform ${
+            className={`fixed z-10 top-0 left-0 h-full w-64 bg-white shadow-lg transition-transform transform ${
                 isVisible ? "translate-x-0" : "-translate-x-full"
             }`}
         >
@@ -28,14 +28,14 @@ export function MenuNav({ isVisible, onClose }: MenuNavProps) {
                             <IoClose />
                         </button>
                     </li>
-                    <li>
-                        <a href="./" className="text-gray-700 hover:text-gray-900">
+                    <li className="mt-10 sm:mt-0">
+                        <a href="/home" className="text-gray-700 hover:text-gray-900">
                             Home
                         </a>
                     </li>
                     <li>
-                        <a href="#" className="text-gray-700 hover:text-gray-900">
-                            About
+                        <a href="/minhas-matriculas" className="text-gray-700 hover:text-gray-900">
+                            Minhas Matrículas
                         </a>
                     </li>
                     <li>

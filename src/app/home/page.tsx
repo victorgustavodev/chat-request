@@ -7,9 +7,32 @@ import { CardMain } from "@/components/chat-bot/cards/cardMain";
 import { CardOption } from "@/components/chat-bot/cards/cardOption";
 import { Navbar } from "@/components/chat-bot/nav/Navbar";
 import { MenuNav } from "./../../components/chat-bot/nav/MenuNav";
-import { validateToken, getMinhasMatriculas } from "@/services/userService";
+import { 
+  validateToken, 
+  getMinhasMatriculas, 
+  getTiposRequerimento, // Garanta que esta função exista no seu service
+  cadastrarRequerimento 
+} from "@/services/userService";
 
-// --- (Seus componentes auxiliares como FileUploadStep e RequirementTypeStep continuam aqui) ---
+// --- Interfaces para um código mais seguro ---
+interface Matricula {
+  id_matricula: number;
+  numero_matricula: string;
+  curso: { nome_curso: string };
+}
+
+interface AnexoExigido {
+  id_tipo_anexo: number;
+  nome_anexo: string;
+}
+
+interface TipoRequerimento {
+  id_tipo_requerimento: number;
+  nome_requerimento: string;
+  anexos_exigidos: AnexoExigido[];
+}
+
+// --- (Componentes auxiliares como FileUploadStep e RequirementTypeStep continuam aqui) ---
 const FileUploadStep = ({
   onSubmit,
 }: {
@@ -111,44 +134,17 @@ export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<any[]>([]);
-  const [requirementData, setRequirementData] = useState<any>({});
-  const [availableRegistrations, setAvailableRegistrations] = useState<any[]>([]);
-
-  // A lista de tipos de requerimento (pode ser buscada da API no futuro)
-  const requirementTypes = [
-    "Admissão por Transferência e Análise Curricular (anexos)",
-    "Ajuste de Matrícula Semestral",
-    "Autorização para cursar disciplinas em outras IES (especifique)",
-    "Cancelamento de Matrícula",
-    "Cancelamento de Disciplina",
-    "Certificado de Conclusão",
-    "Certidão - Autenticidade (especifique)",
-    "Complementação de Matrícula (especifique)",
-    "Cópia Xerox de Documento (especifique)",
-    "Declaração de Colação de Grau e Tramitação de Diploma",
-    "Declaração de Matrícula ou Matrícula Vínculo",
-    "Declaração de Monitoria",
-    "Declaração para Estágio",
-    "Diploma 1ª ou 2ª via",
-    "Dispensa da prática de Educação Física (anexos)",
-    "Declaração Tramitação de Diploma (técnico)",
-    "Ementa de disciplina (especifique)",
-    "Guia de Transferência",
-    "Histórico Escolar",
-    "Isenção de disciplinas cursadas (anexo)",
-    "Justificativa de falta(s) ou prova 2ª chamada (anexos)",
-    "Matriz curricular",
-    "Reabertura de Matrícula",
-    "Reintegração",
-    "Reintegração para Cursar",
-    "Solicitação de Conselho de Classe",
-    "Trancamento de Matrícula",
-    "Transferência de Turno (especifique turno)",
-  ];
-
-  const typesNeedingAttachment = requirementTypes.filter((type) =>
-    type.toLowerCase().includes("(anexo")
-  );
+  
+  // States para os dados da API
+  const [availableRegistrations, setAvailableRegistrations] = useState<Matricula[]>([]);
+  const [requirementTypes, setRequirementTypes] = useState<TipoRequerimento[]>([]);
+  
+  // State para coletar os dados do requerimento
+  const [requirementData, setRequirementData] = useState<{
+      id_matricula?: number;
+      id_tipo_requerimento?: number;
+      tipo_requerimento_obj?: TipoRequerimento;
+  }>({});
 
   // Efeito principal para autenticação e busca de dados
   useEffect(() => {
@@ -161,14 +157,16 @@ export default function Home() {
       
       try {
         const isValid = await validateToken(token);
-        if (!isValid) {
-          throw new Error("Token inválido");
-        }
+        if (!isValid) throw new Error("Token inválido");
         
-        const matriculasData = await getMinhasMatriculas();
-        console.log('JSON completo das matrículas:', matriculasData);
+        const [matriculasData, tiposData] = await Promise.all([
+            getMinhasMatriculas(),
+            getTiposRequerimento()
+        ]);
+
         setAvailableRegistrations(matriculasData); 
-        setIsAuthChecked(true); // Marca que a autenticação e o fetch foram concluídos
+        setRequirementTypes(tiposData);
+        setIsAuthChecked(true);
 
       } catch (error) {
         console.error("Erro no setup inicial:", error);
@@ -182,26 +180,39 @@ export default function Home() {
   // Efeito para montar a mensagem inicial APENAS QUANDO a autenticação estiver verificada
   useEffect(() => {
     if (isAuthChecked) {
-      setMessages([
-        { id: 1, component: <CardMain />, alignment: "center" },
-        {
-          id: 2,
-          type: "options",
-          options: ["Solicitar Requerimento", "Consultar Requerimentos"],
-          handler: handleInitialOption,
-          alignment: "center",
-          layout: "grid grid-cols-1 sm:grid-cols-2",
-        },
-      ]);
+      startNewFlow();
     }
-  }, [isAuthChecked]); // Depende do isAuthChecked
+  }, [isAuthChecked]);
 
   // Efeito para scroll automático
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const addUserMessage = (text: string, prevMessages: any[]) => {
+  // --- Funções do Fluxo do Chat ---
+
+  const startNewFlow = () => {
+    const initialMessages = [
+        { id: Date.now(), component: <CardMain />, alignment: "center" },
+        {
+          id: Date.now() + 1,
+          type: "options",
+          options: ["Solicitar Requerimento", "Consultar Requerimentos"],
+          handler: handleInitialOption,
+          alignment: "center",
+          layout: "grid grid-cols-1 sm:grid-cols-2",
+          disabled: false,
+        },
+    ];
+    // Adiciona as mensagens iniciais ao histórico existente
+    setMessages(prev => [...prev, ...initialMessages]);
+  };
+
+  const disableLastOptions = () => {
+      setMessages(prev => prev.map(msg => msg.type === 'options' ? { ...msg, disabled: true } : msg));
+  };
+
+  const addUserMessage = (text: string) => {
     const userMessage = {
       id: Date.now(),
       component: (
@@ -211,12 +222,12 @@ export default function Home() {
       ),
       alignment: "end",
     };
-    // Remove a última mensagem (que contém as opções) antes de adicionar a do usuário
-    return [...prevMessages.slice(0, -1), userMessage];
+    disableLastOptions();
+    setMessages(prev => [...prev, userMessage]);
   };
 
   const handleInitialOption = (option: string) => {
-    setMessages((prev) => addUserMessage(option, prev));
+    addUserMessage(option);
     setTimeout(() => {
       if (option === "Solicitar Requerimento") {
         askForRegistration();
@@ -235,18 +246,25 @@ export default function Home() {
     const optionsMessage = {
       id: Date.now() + 1,
       type: 'options',
-      options: availableRegistrations.map(reg => reg.numero_matricula),
+      options: availableRegistrations.map(reg => `${reg.numero_matricula} - ${reg.curso.nome_curso}`),
       handler: handleRegistrationSelect,
       alignment: 'center',
-      layout: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      layout: "grid grid-cols-1",
+      disabled: false,
     };
     setMessages(prev => [...prev, botMessage, optionsMessage]);
   };
 
-  const handleRegistrationSelect = (registration: string) => {
-    setRequirementData((prev:any) => ({ ...prev, registration }));
-    setMessages((prev) => addUserMessage(registration, prev));
-    setTimeout(askForRequirementType, 800);
+  const handleRegistrationSelect = (registrationText: string) => {
+    const registrationNumber = registrationText.split(' - ')[0];
+    const selectedRegistration = availableRegistrations.find(reg => reg.numero_matricula === registrationNumber);
+
+    if (selectedRegistration) {
+      // **CORREÇÃO APLICADA AQUI**
+      setRequirementData(prev => ({ ...prev, id_matricula: selectedRegistration.id_matricula }));
+      addUserMessage(registrationText);
+      setTimeout(askForRequirementType, 800);
+    }
   };
 
   const askForRequirementType = () => {
@@ -254,7 +272,7 @@ export default function Home() {
       id: Date.now(),
       component: (
         <RequirementTypeStep
-          allTypes={requirementTypes}
+          allTypes={requirementTypes.map(rt => rt.nome_requerimento)}
           onSelect={handleTypeSelect}
         />
       ),
@@ -263,16 +281,21 @@ export default function Home() {
     setMessages((prev) => [...prev, botMessage]);
   };
 
-  const handleTypeSelect = (type: string) => {
-    setRequirementData((prev:any) => ({ ...prev, type }));
-    setMessages((prev) => addUserMessage(type, prev));
-    setTimeout(() => {
-      if (typesNeedingAttachment.includes(type)) {
-        askForAttachment();
-      } else {
-        finalizeRequirement(null);
-      }
-    }, 800);
+  const handleTypeSelect = (typeName: string) => {
+    const selectedType = requirementTypes.find(rt => rt.nome_requerimento === typeName);
+    
+    if (selectedType) {
+      // **CORREÇÃO APLICADA AQUI**
+      setRequirementData(prev => ({ ...prev, id_tipo_requerimento: selectedType.id_tipo_requerimento, tipo_requerimento_obj: selectedType }));
+      addUserMessage(typeName);
+      setTimeout(() => {
+        if (selectedType.anexos_exigidos && selectedType.anexos_exigidos.length > 0) {
+          askForAttachment();
+        } else {
+          finalizeRequirement(null);
+        }
+      }, 800);
+    }
   };
 
   const askForAttachment = () => {
@@ -284,24 +307,46 @@ export default function Home() {
     setMessages((prev) => [...prev, botMessage]);
   };
 
-  const finalizeRequirement = (file: File | null) => {
-    const finalData = { ...requirementData, file };
-    setRequirementData(finalData);
-    console.log("Dados Finais do Requerimento:", finalData);
+  const finalizeRequirement = async (file: File | null) => {
+    // Desabilita a última etapa (upload ou seleção de tipo)
+    disableLastOptions();
 
-    const confirmationMessage = {
-      id: Date.now(),
-      component: (
-        <div className="bg-white p-4 rounded-lg text-gray-800 max-w-md shadow text-center">
-          ✅<br />
-          <strong>Requerimento enviado com sucesso!</strong>
-          <br />
-          Consulte o status na opção de Consultar Requerimentos.
-        </div>
-      ),
-      alignment: "center",
-    };
-    setMessages((prev) => [...prev.slice(0, -1), confirmationMessage]);
+    const fileMessage = file ? `Arquivo "${file.name}" anexado.` : "Nenhum anexo necessário.";
+    const userFileMessage = { id: Date.now(), component: <div className="bg-green-700 text-white p-3 rounded-lg max-w-xs shadow">{fileMessage}</div>, alignment: "end" };
+    
+    const sendingMessage = { id: Date.now() + 1, component: <div className="bg-white p-3 rounded-lg text-gray-800 max-w-xs shadow">Enviando sua solicitação...</div>, alignment: 'start' };
+    
+    setMessages(prev => [...prev, userFileMessage, sendingMessage]);
+
+    const formData = new FormData();
+    formData.append('id_matricula', String(requirementData.id_matricula));
+    formData.append('id_tipo_requerimento', String(requirementData.id_tipo_requerimento));
+
+    if (file && requirementData.tipo_requerimento_obj?.anexos_exigidos[0]) {
+        formData.append('anexos[0][file]', file);
+        formData.append('anexos[0][id_tipo_anexo]', String(requirementData.tipo_requerimento_obj.anexos_exigidos[0].id_tipo_anexo));
+    }
+
+    try {
+        await cadastrarRequerimento(formData);
+        const confirmationMessage = {
+            id: Date.now() + 2,
+            component: <div className="bg-white p-4 rounded-lg text-gray-800 max-w-md shadow text-center">✅<br/><strong>Requerimento enviado com sucesso!</strong><br/>O que deseja fazer agora?</div>,
+            alignment: 'center'
+        };
+        setMessages(prev => [...prev.slice(0, -1), confirmationMessage]);
+    } catch (error: any) {
+        const errorMessage = {
+            id: Date.now() + 2,
+            component: <div className="bg-red-100 p-4 rounded-lg text-red-700 max-w-md shadow text-center">❌<br/><strong>Falha ao enviar!</strong><br/>{error.message}</div>,
+            alignment: 'center'
+        };
+        setMessages(prev => [...prev.slice(0, -1), errorMessage]);
+    } finally {
+        setTimeout(() => {
+            startNewFlow(); // Reinicia o fluxo
+        }, 2000);
+    }
   };
 
   const toggleMenu = () => {
@@ -352,7 +397,8 @@ export default function Home() {
                       <CardOption
                         key={opt}
                         title={opt}
-                        onClick={() => msg.handler(opt)}
+                        onClick={msg.disabled ? () => {} : () => msg.handler(opt)}
+                        disabled={msg.disabled}
                       />
                     ))}
                   </div>
