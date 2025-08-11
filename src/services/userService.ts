@@ -170,3 +170,36 @@ export async function listarTodosRequerimentos(): Promise<any> {
 
   return response.json();
 }
+
+export async function getRequerimentoById(id: number | string): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado.');
+  }
+
+  // Constrói a URL da API dinamicamente com o ID fornecido
+  const apiUrl = `http://127.0.0.1:8000/api/requerimentos/${id}`;
+
+  const response = await fetch(apiUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  // Verifica se a resposta da API foi bem-sucedida
+  if (!response.ok) {
+    // Tenta extrair uma mensagem de erro do corpo da resposta
+    const errorData = await response.json().catch(() => null);
+    const errorMessage = errorData?.message || `Falha ao buscar o requerimento com ID ${id}.`;
+    
+    // Lança um erro com a mensagem apropriada
+    throw new Error(errorMessage);
+  }
+
+  // Retorna os dados do requerimento em formato JSON
+  return response.json();
+}
+

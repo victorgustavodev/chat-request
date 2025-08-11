@@ -197,7 +197,7 @@ export default function Home() {
         options: ["Solicitar Requerimento", "Consultar Requerimentos"],
         handler: handleInitialOption,
         alignment: "center",
-        layout: "grid grid-cols-1 sm:grid-cols-2",
+        layout: "grid grid-cols-1 sm:grid-cols-2 w-full",
       },
     ]);
   }, []);
@@ -396,11 +396,10 @@ export default function Home() {
     <div className="h-screen flex flex-col bg-[#D9D9D9]">
       <Navbar function={toggleMenu} />
       <div ref={menuRef}>
-        {" "}
         <MenuNav
           isVisible={isMenuVisible}
           onClose={() => setIsMenuVisible(false)}
-        />{" "}
+        />
       </div>
       <main className="flex-1 overflow-y-auto p-4">
         <div className="flex flex-col gap-5 w-full max-w-3xl mx-auto">
@@ -412,7 +411,7 @@ export default function Home() {
               <div key={msg.id} className={containerClasses}>
                 {msg.type === "options" ? (
                   <div
-                    className={`gap-4 w-full lg:w-3/4 animate-fade-in-up ${
+                    className={`gap-4 w-full animate-fade-in-up ${
                       msg.layout || "grid grid-cols-1 sm:grid-cols-2"
                     }`}
                   >

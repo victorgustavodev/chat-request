@@ -39,8 +39,8 @@ export function MenuNav({ isVisible, onClose }: MenuNavProps) {
                         </a>
                     </li>
                     <li>
-                        <button onClick={handleLogout} className=" cursor-pointer text-gray-700 hover:text-gray-900 w-full text-left">
-                            Logout
+                        <button onClick={handleLogout} className=" cursor-pointer text-red-700 hover:text-red-900 w-full text-left">
+                            Realizar Logout
                         </button>
                     </li>
                 </ul>
