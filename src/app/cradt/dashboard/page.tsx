@@ -74,7 +74,7 @@ export default function DashboardPage() {
   const confirmLogout = () => {
     setDialogOpen(false);
     localStorage.removeItem('admin_token');
-    router.push('/login-adm');
+    router.push('/cradt/login');
   };
 
   const cancelLogout = () => {
@@ -129,26 +129,28 @@ export default function DashboardPage() {
             </button>
             {sidebarOpen && <div className="border-t border-white/30 mb-4" />}
             <nav className="flex flex-col gap-4">
-              {/* Links da Navegação */}
+              {/* Aqui você pode colocar os links da navegação */}
             </nav>
           </div>
-          <button
-            onClick={handleLogoutClick}
-            className="hover:bg-emerald-800 text-white p-2 rounded transition whitespace-nowrap flex items-center gap-2"
-          >
-            {sidebarOpen ? (
-              'Sair'
-            ) : (
-              <img src="/images/logout.svg" alt="logout" width={16} height={16} />
-            )}
-          </button>
+<button
+  onClick={handleLogoutClick}
+  className="hover:bg-emerald-800 text-white rounded transition whitespace-nowrap flex items-center justify-center gap-2 p-3"
+  title="Sair"
+  style={{ minWidth: '40px', minHeight: '40px' }} // botão no mínimo 48x48 px (tamanho bom para toque)
+>
+  {sidebarOpen ? (
+    'Sair'
+  ) : (
+    <img src="/images/logout.svg" alt="logout" className="w-6 h-6" />
+  )}
+</button>
         </aside>
 
         {/* Header para Mobile */}
         <header className="flex md:hidden items-center justify-between bg-[#002415] text-white px-4 py-3">
           <img src="/images/aligator_200.png" alt="logo" width={40} height={40} />
           <h1 className="text-lg font-bold">CRADT</h1>
-          <button onClick={() => setMenuOpen(!menuOpen)}>
+          <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menu">
             <HiMenu className="text-2xl" />
           </button>
         </header>
@@ -192,9 +194,9 @@ export default function DashboardPage() {
                       <td className="px-4 py-3">
                         <span
                           className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            req.status === 'Deferido'
+                            req.status === 'Aceito'
                               ? 'bg-green-100 text-green-800'
-                              : req.status === 'Indeferido'
+                              : req.status === 'Recusado'
                               ? 'bg-red-100 text-red-800'
                               : req.status === 'Aberto'
                               ? 'bg-blue-100 text-blue-800'

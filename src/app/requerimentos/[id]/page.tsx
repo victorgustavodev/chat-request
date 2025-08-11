@@ -55,8 +55,8 @@ export default function RequerimentoDetalhePage() {
     );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#002415] p-4 z-50 overflow-auto">
-      <div className="bg-white rounded shadow-lg max-w-3xl w-full p-6 relative">
+    <div className="min-h-screen bg-[#002415] p-6 overflow-auto">
+      <div className="bg-white rounded shadow-lg max-w-3xl w-full mx-auto p-6">
         <Breadcrumb
           items={[
             { label: 'Dashboard', href: '/cradt/dashboard' },
@@ -97,7 +97,6 @@ export default function RequerimentoDetalhePage() {
           <strong>Tipo de Requerimento:</strong> {requerimento.tipo_requerimento.nome_requerimento}
         </div>
 
-        {/* Campo de Anexo movido aqui */}
         <div className="mb-6">
           <label className="block font-semibold mb-2">Anexo:</label>
           <img
@@ -109,7 +108,6 @@ export default function RequerimentoDetalhePage() {
           />
         </div>
 
-        {/* Campo de Observação */}
         <div className="mb-6">
           <label htmlFor="observacao" className="block font-semibold mb-1">
             Observação (opcional):
@@ -124,7 +122,6 @@ export default function RequerimentoDetalhePage() {
           />
         </div>
 
-        {/* Botões */}
         <div className="flex justify-end gap-4">
           <button
             type="button"
@@ -142,7 +139,6 @@ export default function RequerimentoDetalhePage() {
           </button>
         </div>
 
-        {/* Modal de imagem */}
         {isModalOpen && (
           <div
             onClick={() => setIsModalOpen(false)}
@@ -154,7 +150,7 @@ export default function RequerimentoDetalhePage() {
               src="/images/atestado-medico.jpg"
               alt="Atestado Médico Ampliado"
               className="max-w-full max-h-[90vh] rounded shadow-lg"
-              onClick={(e) => e.stopPropagation()} // evitar fechar ao clicar na imagem
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
         )}
