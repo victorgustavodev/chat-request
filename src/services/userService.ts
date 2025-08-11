@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { listarRequerimentos } from '@/services/userService';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/services/userService.ts
 

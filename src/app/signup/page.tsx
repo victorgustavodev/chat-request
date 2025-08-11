@@ -4,80 +4,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+import TextField from "@/components/field/TextField";
+import Button from "@/components/button";
 
-
-// --- FUNÇÃO AUXILIAR PARA MÁSCARAS ---
-const applyMask = (value: string, type?: 'cpf' | 'phone') => {
-  if (!type) return value;
-
-  if (type === 'cpf') {
-    return value
-      .replace(/\D/g, '') 
-      .replace(/(\d{3})(\d)/, '$1.$2') 
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  }
-
-  if (type === 'phone') {
-    let v = value.replace(/\D/g, '');
-    v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
-    v = v.replace(/(\d{5})(\d{4})$/, '$1-$2');
-    return v;
-  }
-
-  return value;
-};
-
-
-// --- COMPONENTE DE CAMPO DE TEXTO ATUALIZADO ---
-interface TextFieldProps {
-  label: string;
-  type: string;
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-  required?: boolean;
-  iconRight?: React.ReactNode;
-  error?: string | string[];
-  maskType?: 'cpf' | 'phone';
-}
-
-const TextField: React.FC<TextFieldProps> = ({ label, error, maskType, onChange, ...props }) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Aplica a máscara antes de atualizar o estado
-    const maskedValue = applyMask(e.target.value, maskType);
-    onChange(maskedValue);
-  };
-
-  // Define o comprimento máximo com base na máscara
-  const maxLength = maskType === 'cpf' ? 14 : maskType === 'phone' ? 15 : undefined;
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <div className="relative">
-        <input
-          {...props}
-          value={props.value}
-          onChange={handleChange}
-          maxLength={maxLength}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-            error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-emerald-500'
-          }`}
-        />
-        {props.iconRight && <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">{props.iconRight}</div>}
-      </div>
-      {error && <p className="text-red-600 text-xs mt-1">{Array.isArray(error) ? error[0] : error}</p>}
-    </div>
-  );
-};
-
-
-// --- COMPONENTE PRINCIPAL DE CADASTRO ---
 export default function Signup() {
-
-
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -112,11 +43,11 @@ export default function Signup() {
     };
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/register', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8000/api/v1/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(payload),
       });
@@ -132,12 +63,10 @@ export default function Signup() {
         }
         return;
       }
-      console.log('Token de acesso:', data.access_token);
-      setMensagem("Usuário cadastrado com sucesso!");
-      router.push('/signin');
-      // localStorage.setItem('auth_token', data.access_token);
-      // window.location.href = '/dashboard';
 
+      console.log("Token de acesso:", data.access_token);
+      setMensagem("Usuário cadastrado com sucesso!");
+      router.push("/signin");
     } catch (error: any) {
       setMensagem("Erro de conexão: Não foi possível conectar à API.");
       console.error("Erro de rede ou API:", error);
@@ -152,9 +81,14 @@ export default function Signup() {
         <h1 className="text-4xl font-bold mb-4">Bem Vindo ao</h1>
         <h2 className="text-4xl font-bold mb-4">Chat Request!</h2>
         <p className="text-lg text-center max-w-md">
-          Cadastre-se para acessar nosso serviço de gerenciamento e consulta de requerimentos.
+          Cadastre-se para acessar nosso serviço de gerenciamento e consulta de
+          requerimentos.
         </p>
-        <img src="/images/aligator_200.png" alt="logo" className="w-40 h-40 mt-8" />
+        <img
+          src="/images/aligator_200.png"
+          alt="logo"
+          className="w-40 h-40 mt-8"
+        />
       </div>
 
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6 bg-gray-50">
@@ -163,8 +97,12 @@ export default function Signup() {
             onSubmit={handleSubmit}
             className="bg-white rounded-lg shadow-md p-6 flex flex-col gap-4"
           >
-            <h2 className="text-2xl font-semibold text-emerald-700 text-center">Criar Conta</h2>
-            <p className="text-center text-sm text-gray-600 ">Para acessar nosso serviço de forma rápida e segura.</p>
+            <h2 className="text-2xl font-semibold text-emerald-700 text-center">
+              Criar Conta
+            </h2>
+            <p className="text-center text-sm text-gray-600">
+              Para acessar nosso serviço de forma rápida e segura.
+            </p>
 
             <TextField
               label="Nome Completo"
@@ -173,7 +111,7 @@ export default function Signup() {
               value={form.name}
               onChange={(value) => setForm({ ...form, name: value })}
               required
-              error={errors.nome_completo}
+              error={errors.nome_completo ? errors.nome_completo[0] : undefined}
             />
             <TextField
               label="E-mail"
@@ -182,26 +120,27 @@ export default function Signup() {
               value={form.email}
               onChange={(value) => setForm({ ...form, email: value })}
               required
-              error={errors.email}
+              error={errors.email ? errors.email[0] : undefined}
             />
-             <TextField
+            <TextField
               label="CPF"
-              type="text"
+              type="cpf"
+              MaxLength={14}
               placeholder="000.000.000-00"
               value={form.cpf}
               onChange={(value) => setForm({ ...form, cpf: value })}
               required
-              maskType="cpf" // Adicionado
-              error={errors.cpf}
+              error={errors.cpf ? errors.cpf[0] : undefined}
+              iconRight={<img src="/images/cpf.svg" alt="CPF" className="w-4 h-4" />}
             />
-             <TextField
+            <TextField
               label="Telefone"
-              type="tel" // Alterado para 'tel' para semântica
+              type="phone"
+              MaxLength={15}
               placeholder="(00) 00000-0000"
               value={form.phone}
               onChange={(value) => setForm({ ...form, phone: value })}
-              maskType="phone" // Adicionado
-              error={errors.telefone}
+              error={errors.telefone ? errors.telefone[0] : undefined}
             />
             <TextField
               label="Nº Identidade (RG)"
@@ -210,7 +149,7 @@ export default function Signup() {
               value={form.identidade}
               onChange={(value) => setForm({ ...form, identidade: value })}
               required
-              error={errors.identidade}
+              error={errors.identidade ? errors.identidade[0] : undefined}
             />
             <TextField
               label="Órgão Expedidor"
@@ -219,7 +158,7 @@ export default function Signup() {
               value={form.orgao_expedidor}
               onChange={(value) => setForm({ ...form, orgao_expedidor: value })}
               required
-              error={errors.orgao_expedidor}
+              error={errors.orgao_expedidor ? errors.orgao_expedidor[0] : undefined}
             />
             <TextField
               label="Senha"
@@ -228,28 +167,36 @@ export default function Signup() {
               value={form.password}
               onChange={(value) => setForm({ ...form, password: value })}
               required
-              error={errors.password}
+              error={errors.password ? errors.password[0] : undefined}
             />
             <TextField
               label="Confirme a senha"
               type="password"
               placeholder="Confirme a senha"
               value={form.password_confirmation}
-              onChange={(value) => setForm({ ...form, password_confirmation: value })}
+              onChange={(value) =>
+                setForm({ ...form, password_confirmation: value })
+              }
               required
-              error={errors.password_confirmation}
+              error={errors.password_confirmation ? errors.password_confirmation[0] : undefined}
             />
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="bg-[#002415] hover:bg-emerald-900 transition-all text-white font-semibold py-2 rounded-md disabled:bg-gray-400"
+              className="bg-[#002415] hover:bg-emerald-900 text-white font-semibold py-[10px] rounded-md disabled:bg-gray-400"
             >
-              {isLoading ? 'Cadastrando...' : 'Cadastrar'}
-            </button>
+              {isLoading ? "Cadastrando..." : "Cadastrar"}
+            </Button>
 
             {mensagem && (
-              <p className={`text-center text-sm ${errors && Object.keys(errors).length > 0 ? 'text-red-600' : 'text-emerald-600'} mt-2`}>
+              <p
+                className={`text-center text-sm ${
+                  errors && Object.keys(errors).length > 0
+                    ? "text-red-600"
+                    : "text-emerald-600"
+                } mt-2`}
+              >
                 {mensagem}
               </p>
             )}
@@ -257,7 +204,10 @@ export default function Signup() {
 
           <p className="text-center text-sm text-gray-600 mt-4">
             Já tem uma conta?
-            <Link href="/signin" className="text-emerald-600 font-medium hover:underline ml-1">
+            <Link
+              href="/signin"
+              className="text-emerald-600 font-medium hover:underline ml-1"
+            >
               Entrar
             </Link>
           </p>
