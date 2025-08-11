@@ -1,8 +1,9 @@
-interface Requerimento {
+export interface Requerimento {
   id_requerimento: number;
   protocolo: string;
   status: string;
   created_at: string;
+  observacao_cradt?: string;
   matricula: {
     numero_matricula: string;
     aluno: {
@@ -12,7 +13,4 @@ interface Requerimento {
   tipo_requerimento: {
     nome_requerimento: string;
   };
-  observacao_cradt?: string;
 }
-
-export type { Requerimento };
