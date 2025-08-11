@@ -1,29 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CardMain } from "@/components/chat-bot/cards/cardMain";
 import { CardOption } from "@/components/chat-bot/cards/cardOption";
 import { Navbar } from "@/components/chat-bot/nav/Navbar";
 import { MenuNav } from "./../../components/chat-bot/nav/MenuNav";
-import { validateToken } from "@/services/userService";
-import { getMinhasMatriculas } from "../../services/userService"; // Ajuste o caminho se necessário
+import { validateToken, getMinhasMatriculas } from "@/services/userService";
 
-// Defina uma interface para o objeto de matrícula para ter um código mais seguro e com autocompletar
-interface Matricula {
-  id: number;
-  course_name: string; // Exemplo de campos, ajuste conforme seu JSON real
-  status: string;
-  registration_date: string;
-}
-
-// --- COMPONENTE DE UPLOAD (SEM ALTERAÇÕES) ---
+// --- (Seus componentes auxiliares como FileUploadStep e RequirementTypeStep continuam aqui) ---
 const FileUploadStep = ({
   onSubmit,
 }: {
   onSubmit: (file: File | null) => void;
 }) => {
   const [file, setFile] = useState<File | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) setFile(e.target.files[0]);
   };
@@ -57,7 +50,6 @@ const FileUploadStep = ({
   );
 };
 
-// --- NOVO COMPONENTE PARA BUSCA DE REQUERIMENTOS ---
 const RequirementTypeStep = ({
   allTypes,
   onSelect,
@@ -67,8 +59,6 @@ const RequirementTypeStep = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Lógica de filtro simplificada: sempre filtra a lista completa.
-  // Se o campo de busca estiver vazio, todos os itens passam pelo filtro.
   const filteredTypes = allTypes.filter((type) =>
     type.toLowerCase().includes(searchTerm.toLowerCase().trim())
   );
@@ -90,7 +80,6 @@ const RequirementTypeStep = ({
         onChange={(e) => setSearchTerm(e.target.value)}
         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
       />
-      {/* Container da lista com scroll e layout responsivo */}
       <div className="max-h-[22rem] overflow-y-auto pr-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {filteredTypes.length > 0 ? (
@@ -112,11 +101,9 @@ const RequirementTypeStep = ({
   );
 };
 
-// --- COMPONENTE PRINCIPAL DA PÁGINA (MODIFICADO) ---
+
+// --- COMPONENTE PRINCIPAL DA PÁGINA ---
 export default function Home() {
-  const [matriculas, setMatriculas] = useState<Matricula[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -125,14 +112,9 @@ export default function Home() {
 
   const [messages, setMessages] = useState<any[]>([]);
   const [requirementData, setRequirementData] = useState<any>({});
+  const [availableRegistrations, setAvailableRegistrations] = useState<any[]>([]);
 
-  const availableRegistrations = [
-    "MAT-2025-001",
-    "MAT-2025-002",
-    "MAT-2025-003",
-  ];
-
-  // --- LISTA DE REQUERIMENTOS ATUALIZADA ---
+  // A lista de tipos de requerimento (pode ser buscada da API no futuro)
   const requirementTypes = [
     "Admissão por Transferência e Análise Curricular (anexos)",
     "Ajuste de Matrícula Semestral",
@@ -164,44 +146,57 @@ export default function Home() {
     "Transferência de Turno (especifique turno)",
   ];
 
-  // --- LÓGICA DE ANEXO: Define quais tipos exigem anexo ---
   const typesNeedingAttachment = requirementTypes.filter((type) =>
     type.toLowerCase().includes("(anexo")
   );
 
-  // --- BUSCA DE MATRÍCULAS COM TRATAMENTO DE ERRO E LOADING ---
+  // Efeito principal para autenticação e busca de dados
   useEffect(() => {
-    // Função async dentro do useEffect para buscar os dados
-    const fetchData = async () => {
+    const checkAuthAndFetchData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/signin');
+        return;
+      }
+      
       try {
-        const data = await getMinhasMatriculas();
-        setMatriculas(data);
-        setError(null); // Limpa erros anteriores em caso de sucesso
-      } catch (err: any) {
-        setError(err.message || "Ocorreu um erro desconhecido.");
-      } finally {
-        setLoading(false); // Garante que o loading termine, com sucesso ou erro
+        const isValid = await validateToken(token);
+        if (!isValid) {
+          throw new Error("Token inválido");
+        }
+        
+        const matriculasData = await getMinhasMatriculas();
+        console.log('JSON completo das matrículas:', matriculasData);
+        setAvailableRegistrations(matriculasData); 
+        setIsAuthChecked(true); // Marca que a autenticação e o fetch foram concluídos
+
+      } catch (error) {
+        console.error("Erro no setup inicial:", error);
+        localStorage.removeItem('token');
+        router.push('/signin');
       }
     };
+    checkAuthAndFetchData();
+  }, [router]);
 
-    fetchData();
-  }, []); // O array vazio [] garante que o useEffect rode apenas uma vez
-
-  // Efeitos e handlers iniciais (sem grandes alterações)
+  // Efeito para montar a mensagem inicial APENAS QUANDO a autenticação estiver verificada
   useEffect(() => {
-    setMessages([
-      { id: 1, component: <CardMain />, alignment: "center" },
-      {
-        id: 2,
-        type: "options",
-        options: ["Solicitar Requerimento", "Consultar Requerimentos"],
-        handler: handleInitialOption,
-        alignment: "center",
-        layout: "grid grid-cols-1 sm:grid-cols-2 w-full",
-      },
-    ]);
-  }, []);
+    if (isAuthChecked) {
+      setMessages([
+        { id: 1, component: <CardMain />, alignment: "center" },
+        {
+          id: 2,
+          type: "options",
+          options: ["Solicitar Requerimento", "Consultar Requerimentos"],
+          handler: handleInitialOption,
+          alignment: "center",
+          layout: "grid grid-cols-1 sm:grid-cols-2",
+        },
+      ]);
+    }
+  }, [isAuthChecked]); // Depende do isAuthChecked
 
+  // Efeito para scroll automático
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -216,6 +211,7 @@ export default function Home() {
       ),
       alignment: "end",
     };
+    // Remove a última mensagem (que contém as opções) antes de adicionar a do usuário
     return [...prevMessages.slice(0, -1), userMessage];
   };
 
@@ -225,16 +221,7 @@ export default function Home() {
       if (option === "Solicitar Requerimento") {
         askForRegistration();
       } else {
-        const botResponse = {
-          id: Date.now() + 1,
-          component: (
-            <div className="bg-white p-3 rounded-lg text-gray-800 max-w-xs shadow">
-              A funcionalidade de consulta ainda está em desenvolvimento.
-            </div>
-          ),
-          alignment: "start",
-        };
-        setMessages((prev) => [...prev, botResponse]);
+        // Lógica para consultar requerimentos
       }
     }, 800);
   };
@@ -242,35 +229,29 @@ export default function Home() {
   const askForRegistration = () => {
     const botMessage = {
       id: Date.now(),
-      component: (
-        <div className="bg-white p-3 rounded-lg text-gray-800 max-w-xs shadow">
-          Ok! Primeiro, selecione sua matrícula:
-        </div>
-      ),
-      alignment: "start",
+      component: <div className="bg-white p-3 rounded-lg text-gray-800 max-w-xs shadow">Ok! Primeiro, selecione sua matrícula:</div>,
+      alignment: 'start'
     };
     const optionsMessage = {
       id: Date.now() + 1,
-      type: "options",
-      options: availableRegistrations,
+      type: 'options',
+      options: availableRegistrations.map(reg => reg.numero_matricula),
       handler: handleRegistrationSelect,
-      alignment: "center",
-      layout: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+      alignment: 'center',
+      layout: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
     };
-    setMessages((prev) => [...prev, botMessage, optionsMessage]);
+    setMessages(prev => [...prev, botMessage, optionsMessage]);
   };
 
   const handleRegistrationSelect = (registration: string) => {
-    setRequirementData((prev) => ({ ...prev, registration }));
+    setRequirementData((prev:any) => ({ ...prev, registration }));
     setMessages((prev) => addUserMessage(registration, prev));
     setTimeout(askForRequirementType, 800);
   };
 
-  // --- ETAPA DE TIPO DE REQUERIMENTO MODIFICADA ---
   const askForRequirementType = () => {
     const botMessage = {
       id: Date.now(),
-      // Usa o novo componente de busca
       component: (
         <RequirementTypeStep
           allTypes={requirementTypes}
@@ -282,18 +263,13 @@ export default function Home() {
     setMessages((prev) => [...prev, botMessage]);
   };
 
-  // --- HANDLER MODIFICADO PARA LÓGICA CONDICIONAL DE ANEXO ---
   const handleTypeSelect = (type: string) => {
-    // Atualiza os dados e a mensagem do usuário
-    setRequirementData((prev) => ({ ...prev, type }));
+    setRequirementData((prev:any) => ({ ...prev, type }));
     setMessages((prev) => addUserMessage(type, prev));
-
     setTimeout(() => {
-      // Verifica se o tipo selecionado precisa de anexo
       if (typesNeedingAttachment.includes(type)) {
         askForAttachment();
       } else {
-        // Se não precisar, finaliza o requerimento sem arquivo
         finalizeRequirement(null);
       }
     }, 800);
@@ -308,13 +284,9 @@ export default function Home() {
     setMessages((prev) => [...prev, botMessage]);
   };
 
-  // --- FUNÇÃO DE FINALIZAÇÃO CENTRALIZADA ---
   const finalizeRequirement = (file: File | null) => {
-    // Coleta todos os dados, incluindo o arquivo (que pode ser null)
     const finalData = { ...requirementData, file };
     setRequirementData(finalData);
-
-    // Log para ver os dados coletados (você enviaria para a API aqui)
     console.log("Dados Finais do Requerimento:", finalData);
 
     const confirmationMessage = {
@@ -324,17 +296,14 @@ export default function Home() {
           ✅<br />
           <strong>Requerimento enviado com sucesso!</strong>
           <br />
-          Consulte o status na opção "Consultar Requerimentos".
+          Consulte o status na opção de Consultar Requerimentos.
         </div>
       ),
       alignment: "center",
     };
-
-    // Remove a última etapa (busca ou upload) e adiciona a confirmação
     setMessages((prev) => [...prev.slice(0, -1), confirmationMessage]);
   };
 
-  // ... O resto do seu código (toggleMenu, useEffects de auth, return com o JSX) continua o mesmo.
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
   };
@@ -348,46 +317,10 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuVisible]);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/signin");
-        return;
-      }
-      try {
-        const isValid = await validateToken(token);
-        if (!isValid) {
-          localStorage.removeItem("token");
-          router.push("/signin");
-        } else {
-          setIsAuthChecked(true);
-        }
-      } catch (error) {
-        console.error("Erro ao validar token:", error);
-        localStorage.removeItem("token");
-        router.push("/signin");
-      }
-    };
-    checkAuth();
-  }, [router]);
-
   if (!isAuthChecked) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#002415] text-white">
         Carregando...
-      </div>
-    );
-  }
-
-  if (loading) {
-    return <div className="text-center p-8">Carregando suas matrículas...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-8 text-red-500 bg-red-100 rounded-lg">
-        Erro: {error}
       </div>
     );
   }
