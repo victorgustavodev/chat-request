@@ -141,6 +141,7 @@ export default function Signup() {
               value={form.phone}
               onChange={(value) => setForm({ ...form, phone: value })}
               error={errors.telefone ? errors.telefone[0] : undefined}
+              iconRight={<img src="/images/phone.svg" alt="CPF" className="w-4 h-4" />}
             />
             <TextField
               label="Nº Identidade (RG)"

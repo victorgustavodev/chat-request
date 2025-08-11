@@ -185,7 +185,10 @@ export default function DashboardPage() {
               <tbody className="divide-y divide-gray-100">
                 {requerimentos.length > 0 ? (
                   requerimentos.map((req) => (
-                    <tr key={req.id_requerimento} className="hover:bg-gray-100 transition">
+                    <tr 
+                    key={req.id_requerimento} 
+                    className="hover:bg-gray-100 transition"
+                    onClick={() => router.push(`/cradt/dashboard/${req.id_requerimento}`)}>
                       {/* 3. Células da tabela usando os dados aninhados da API */}
                       <td className="px-4 py-3 font-mono">{req.protocolo}</td>
                       <td className="px-4 py-3">
