@@ -27,12 +27,12 @@ interface LoginData {
 }
 
 export async function listarUsuarios() {
-  const response = await fetch("http://127.0.0.1:8000/api/v1/alunos");
+  const response = await fetch("http://127.0.0.1:8000/api/alunos");
   return await response.json();
 }
 
 export async function cadastrarUsuario(data: UserData) {
-  const response = await fetch("http://127.0.0.1:8000/api/v1/register", {
+  const response = await fetch("http://127.0.0.1:8000/api/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export async function cadastrarUsuario(data: UserData) {
 }
 
 export async function logarUsuario(data: LoginData) {
-  const response = await fetch("http://127.0.0.1:8000/api/v1/login", {
+  const response = await fetch("http://127.0.0.1:8000/api/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -79,7 +79,7 @@ export async function getMinhasMatriculas(): Promise<any[]> {
     throw new Error('Token de autenticação não encontrado.');
   }
 
-  const response = await fetch('http://127.0.0.1:8000/api/v1/my-registrations', {
+  const response = await fetch('http://127.0.0.1:8000/api/my-registrations', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export async function getMinhasMatriculas(): Promise<any[]> {
 
 export async function validateToken(token: string): Promise<boolean> {
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/v1/validate-token", {
+    const response = await fetch("http://127.0.0.1:8000/api/validate-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -118,7 +118,7 @@ export async function getTiposRequerimento(): Promise<any[]> {
   const token = localStorage.getItem('token');
   if (!token) throw new Error('Token de autenticação não encontrado.');
 
-  const response = await fetch('http://127.0.0.1:8000/api/v1/tipos-requerimento', {
+  const response = await fetch('http://127.0.0.1:8000/api/tipos-requerimento', {
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -133,7 +133,7 @@ export async function cadastrarRequerimento(formData: FormData) {
   const token = localStorage.getItem('token');
   if (!token) throw new Error('Token de autenticação não encontrado.');
 
-  const response = await fetch("http://127.0.0.1:8000/api/v1/requerimentos", {
+  const response = await fetch("http://127.0.0.1:8000/api/requerimentos", {
     method: "POST",
     headers: {
       'Accept': 'application/json',
