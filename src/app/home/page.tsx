@@ -11,10 +11,11 @@ import {
   validateToken, 
   getMinhasMatriculas, 
   getTiposRequerimento,
-  cadastrarRequerimento 
+  cadastrarRequerimento,
+  getMeusRequerimentos // Importe a nova função
 } from "@/services/userService";
 
-// --- Interfaces para um código mais seguro ---
+// --- Interfaces ---
 interface Matricula {
   id_matricula: number;
   numero_matricula: string;
@@ -32,7 +33,76 @@ interface TipoRequerimento {
   anexos_exigidos: AnexoExigido[];
 }
 
-// --- (Componentes auxiliares como FileUploadStep, RequirementTypeStep, ObservationsStep continuam aqui) ---
+interface Requerimento {
+    id_requerimento: number;
+    protocolo: string;
+    status: string;
+    created_at: string;
+    tipo_requerimento: {
+        nome_requerimento: string;
+    }
+}
+
+// --- Componentes Auxiliares ---
+
+// NOVO COMPONENTE PARA LISTAR OS REQUERIMENTOS
+const ConsultarRequerimentos = () => {
+    const [requerimentos, setRequerimentos] = useState<Requerimento[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchRequerimentos = async () => {
+            try {
+                const data = await getMeusRequerimentos();
+                setRequerimentos(data);
+            } catch (err: any) {
+                setError(err.message || "Erro ao buscar requerimentos.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRequerimentos();
+    }, []);
+
+    const getStatusClass = (status: string) => {
+        switch (status) {
+            case 'Deferido': return 'bg-green-100 text-green-800';
+            case 'Indeferido': return 'bg-red-100 text-red-800';
+            case 'Aberto': return 'bg-blue-100 text-blue-800';
+            default: return 'bg-yellow-100 text-yellow-800';
+        }
+    };
+
+    if (loading) return <div className="text-center p-4">Carregando seus requerimentos...</div>;
+    if (error) return <div className="text-center p-4 text-red-600">{error}</div>;
+
+    return (
+        <div className="w-full p-4 sm:p-6 bg-white rounded-xl shadow-lg flex flex-col gap-4">
+            <h3 className="text-lg font-bold text-gray-800">Seus Requerimentos</h3>
+            {requerimentos.length === 0 ? (
+                <p className="text-gray-500">Você ainda não solicitou nenhum requerimento.</p>
+            ) : (
+                <div className="space-y-3">
+                    {requerimentos.map(req => (
+                        <div key={req.id_requerimento} className="p-3 border rounded-md flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold">{req.tipo_requerimento.nome_requerimento}</p>
+                                <p className="text-xs text-gray-500">Protocolo: {req.protocolo}</p>
+                            </div>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusClass(req.status)}`}>
+                                {req.status}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+
+// (Seus outros componentes auxiliares como FileUploadStep, etc. continuam aqui)
 const FileUploadStep = ({
   onSubmit,
 }: {
@@ -177,7 +247,11 @@ export default function Home() {
       tipo_requerimento_obj?: TipoRequerimento;
   }>({});
 
-  // Efeito principal para autenticação e busca de dados
+  const requirementDataRef = useRef(requirementData);
+  useEffect(() => {
+    requirementDataRef.current = requirementData;
+  }, [requirementData]);
+
   useEffect(() => {
     const checkAuthAndFetchData = async () => {
       const token = localStorage.getItem('token');
@@ -208,14 +282,12 @@ export default function Home() {
     checkAuthAndFetchData();
   }, [router]);
 
-  // Efeito para montar a mensagem inicial
   useEffect(() => {
     if (isAuthChecked) {
       startNewFlow();
     }
   }, [isAuthChecked]);
 
-  // Efeito para scroll automático
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -223,7 +295,7 @@ export default function Home() {
   // --- Funções do Fluxo do Chat ---
 
   const startNewFlow = () => {
-    setMessages([
+    const initialMessages = [
         { id: Date.now(), component: <CardMain />, alignment: "center" },
         {
           id: Date.now() + 1,
@@ -234,7 +306,8 @@ export default function Home() {
           layout: "grid grid-cols-1 sm:grid-cols-2",
           disabled: false,
         },
-    ]);
+    ];
+    setMessages(prev => [...prev, ...initialMessages]);
   };
 
   const disableLastOptions = () => {
@@ -256,8 +329,31 @@ export default function Home() {
     setTimeout(() => {
       if (option === "Solicitar Requerimento") {
         askForRegistration();
-      } else { /* Lógica para consultar requerimentos */ }
+      } else if (option === "Consultar Requerimentos") {
+        showMyRequirements();
+      }
     }, 800);
+  };
+
+  const showMyRequirements = () => {
+      const botMessage = {
+          id: Date.now(),
+          component: <ConsultarRequerimentos />,
+          alignment: 'start'
+      };
+      const restartOptions = {
+          id: Date.now() + 1,
+          type: "options",
+          options: ["Solicitar Outro Requerimento"],
+          handler: (opt: string) => {
+              addUserMessage(opt);
+              setTimeout(askForRegistration, 800);
+          },
+          alignment: 'center',
+          layout: 'grid grid-cols-1',
+          disabled: false
+      };
+      setMessages(prev => [...prev, botMessage, restartOptions]);
   };
 
   const askForRegistration = () => {
@@ -318,20 +414,16 @@ export default function Home() {
   };
   
   const handleObservationsSubmit = (observations: string) => {
-      // **CORREÇÃO APLICADA AQUI**
       setRequirementData(prev => ({ ...prev, observacoes: observations }));
       addUserMessage(observations || "Nenhuma observação.");
 
       setTimeout(() => {
-          setRequirementData(currentData => {
-            const currentRequirement = currentData.tipo_requerimento_obj;
-            if (currentRequirement?.anexos_exigidos && currentRequirement.anexos_exigidos.length > 0) {
-                askForAttachment();
-            } else {
-                finalizeRequirement(null);
-            }
-            return currentData;
-          });
+          const currentRequirement = requirementDataRef.current.tipo_requerimento_obj;
+          if (currentRequirement?.anexos_exigidos && currentRequirement.anexos_exigidos.length > 0) {
+              askForAttachment();
+          } else {
+              finalizeRequirement(null);
+          }
       }, 800);
   };
 
@@ -353,45 +445,40 @@ export default function Home() {
     disableLastOptions();
     setMessages(prev => [...prev, userFileMessage, sendingMessage]);
 
-    setRequirementData(currentData => {
-        const formData = new FormData();
-        formData.append('id_matricula', String(currentData.id_matricula));
-        formData.append('id_tipo_requerimento', String(currentData.id_tipo_requerimento));
-        
-        if (currentData.observacoes) {
-            formData.append('observacoes', currentData.observacoes);
-        }
+    const currentData = requirementDataRef.current;
+    const formData = new FormData();
+    formData.append('id_matricula', String(currentData.id_matricula));
+    formData.append('id_tipo_requerimento', String(currentData.id_tipo_requerimento));
+    
+    if (currentData.observacoes) {
+        formData.append('observacoes', currentData.observacoes);
+    }
 
-        if (file && currentData.tipo_requerimento_obj?.anexos_exigidos[0]) {
-            formData.append('anexos[0][file]', file);
-            formData.append('anexos[0][id_tipo_anexo]', String(currentData.tipo_requerimento_obj.anexos_exigidos[0].id_tipo_anexo));
-        }
+    if (file && currentData.tipo_requerimento_obj?.anexos_exigidos[0]) {
+        formData.append('anexos[0][file]', file);
+        formData.append('anexos[0][id_tipo_anexo]', String(currentData.tipo_requerimento_obj.anexos_exigidos[0].id_tipo_anexo));
+    }
 
-        cadastrarRequerimento(formData)
-            .then(() => {
-                const confirmationMessage = {
-                    id: Date.now() + 2,
-                    component: <div className="bg-white p-4 rounded-lg text-gray-800 max-w-md shadow text-center">✅<br/><strong>Requerimento enviado com sucesso!</strong><br/>O que deseja fazer agora?</div>,
-                    alignment: 'center'
-                };
-                setMessages(prev => [...prev.slice(0, -1), confirmationMessage]);
-            })
-            .catch((error) => {
-                const errorMessage = {
-                    id: Date.now() + 2,
-                    component: <div className="bg-red-100 p-4 rounded-lg text-red-700 max-w-md shadow text-center">❌<br/><strong>Falha ao enviar!</strong><br/>{error.message}</div>,
-                    alignment: 'center'
-                };
-                setMessages(prev => [...prev.slice(0, -1), errorMessage]);
-            })
-            .finally(() => {
-                setTimeout(() => {
-                    startNewFlow();
-                }, 2000);
-            });
-        
-        return currentData;
-    });
+    try {
+        await cadastrarRequerimento(formData);
+        const confirmationMessage = {
+            id: Date.now() + 2,
+            component: <div className="bg-white p-4 rounded-lg text-gray-800 max-w-md shadow text-center">✅<br/><strong>Requerimento enviado com sucesso!</strong><br/>O que deseja fazer agora?</div>,
+            alignment: 'center'
+        };
+        setMessages(prev => [...prev.slice(0, -1), confirmationMessage]);
+    } catch (error: any) {
+        const errorMessage = {
+            id: Date.now() + 2,
+            component: <div className="bg-red-100 p-4 rounded-lg text-red-700 max-w-md shadow text-center">❌<br/><strong>Falha ao enviar!</strong><br/>{error.message}</div>,
+            alignment: 'center'
+        };
+        setMessages(prev => [...prev.slice(0, -1), errorMessage]);
+    } finally {
+        setTimeout(() => {
+            startNewFlow();
+        }, 2000);
+    }
   };
 
   const toggleMenu = () => {

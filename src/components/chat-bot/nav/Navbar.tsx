@@ -3,7 +3,7 @@ import { IoMenu } from "react-icons/io5";
 export function Navbar(props: { function: () => void }) {
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center p-8">
+      <div className="flex justify-between items-center p-8 bg-transparent">
         <button onClick={props.function} className="cursor-pointer text-3xl">
           <IoMenu />
         </button>

@@ -13,8 +13,14 @@ export const CardOption = ({ title, onClick }: CardOptionProps) => {
     <div
       onClick={onClick} // Aqui está a mágica! Executamos a função recebida no clique.
       className="
+       sm:min-h-[100px]
         w-full
+        flex
+        justify-center
+        items-center
         p-4
+        text-sm
+        sm:text-base
         bg-white
         rounded-lg
         shadow-md
@@ -27,8 +33,7 @@ export const CardOption = ({ title, onClick }: CardOptionProps) => {
         ease-in-out
         hover:bg-green-100
         hover:shadow-lg
-        hover:scale-105
-        active:scale-100
+        
       "
     >
       {title}

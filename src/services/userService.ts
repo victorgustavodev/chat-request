@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/services/userService.ts
 
+import { Requerimento } from "@/app/cradt/dashboard/type";
+
 export interface UserData {
   name: string;
   email: string;
@@ -22,6 +24,11 @@ export interface ApiRequerimento {
 
 interface LoginData {
   cpf: string;
+  password: string;
+}
+
+interface LoginWithEmailData {
+  email: string; // Ou cpf, dependendo da função
   password: string;
 }
 
@@ -65,6 +72,28 @@ export async function logarUsuario(data: LoginData) {
   if (!response.ok) {
     // Lança um erro com a mensagem vinda da API (ex: "Invalid credentials")
     throw new Error(responseData.message || "CPF ou senha inválidos.");
+  }
+
+  // Se tudo deu certo, retorna os dados (que devem incluir o token)
+  return responseData;
+}
+
+export async function logarUsuarioComEmail(data: LoginWithEmailData) {
+  const response = await fetch("http://127.0.0.1:8000/api/loginWithEmail", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const responseData = await response.json();
+
+  // Se a resposta da API indicar um erro (status não-2xx)
+  if (!response.ok) {
+    // Lança um erro com a mensagem vinda da API
+    throw new Error(responseData.error || "E-mail ou senha inválidos.");
   }
 
   // Se tudo deu certo, retorna os dados (que devem incluir o token)
@@ -176,6 +205,33 @@ export async function listarTodosRequerimentos(Token: string): Promise<any> {
   return response.json();
 }
 
+export async function listarRequerimentosPorAluno(
+  Token: string,
+  alunoId: number
+): Promise<any[]> {
+  if (!Token) {
+    throw new Error('Token de administrador não fornecido.');
+  }
+
+  const response = await fetch(`http://127.0.0.1:8000/api/alunos/${alunoId}/requerimentos`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${Token}`,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Não autorizado. Verifique se o token de admin é válido.');
+    }
+    throw new Error('Falha ao buscar os requerimentos do aluno.');
+  }
+
+  return response.json();
+}
+
 export async function getRequerimentoById(id: number | string): Promise<any> {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -208,4 +264,47 @@ export async function getRequerimentoById(id: number | string): Promise<any> {
   return response.json();
 }
 
+export async function getMeusRequerimentos(): Promise<any[]> {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado.');
+  }
 
+  const response = await fetch('http://127.0.0.1:8000/api/my-requerimentos', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Falha ao buscar seus requerimentos.');
+  }
+
+  return response.json();
+
+}
+
+export async function updateRequerimentoStatus(id: number, status: 'Deferido' | 'Indeferido'): Promise<Requerimento> {
+  // CORREÇÃO: Usar crases (`) para a URL funcionar com a variável ${id}
+  // e remover a barra dupla "//"
+  const response = await fetch(`http://127.0.0.1:8000/api/requerimentos/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      // Se você usa autenticação, adicione o header aqui:
+      // 'Authorization': `Bearer ${your_token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Ocorreu um erro ao atualizar o status.');
+  }
+
+  return response.json();
+}

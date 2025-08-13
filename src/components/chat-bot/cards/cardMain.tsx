@@ -6,7 +6,6 @@ export function CardMain(props: { bodyText?: string }) {
     <div
       className="
       w-full
-      max-w-2xl
       bg-white
       rounded-2xl
       shadow-lg
@@ -14,7 +13,7 @@ export function CardMain(props: { bodyText?: string }) {
       flex
       items-start
       gap-4
-      animate-fade-in-up
+      
     "
     >
       {/* Container do Ícone */}
@@ -27,7 +26,7 @@ export function CardMain(props: { bodyText?: string }) {
 
       {/* Bloco de Texto */}
       <div>
-        <h3 className="font-bold text-gray-800 text-base sm:text-lg">
+        <h3 className="font-bold text-gray-800 text-base sm:text-lg w-full">
           Assistente Virtual
         </h3>
         <p className="text-gray-600 text-sm sm:text-base mt-1">

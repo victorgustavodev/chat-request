@@ -22,7 +22,7 @@ export default function HomePage() {
           <nav className="hidden md:flex items-center gap-6">
             <a href="#features" className="hover:text-emerald-700 transition-colors">Funcionalidades</a>
             <a href="#how-it-works" className="hover:text-emerald-700 transition-colors">Como Funciona</a>
-            <Link href="/cradt/login" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors">
+            <Link href="/cradt/signin" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors">
               Acesso CRADT
             </Link>
           </nav>
@@ -38,8 +38,8 @@ export default function HomePage() {
 
       <main>
         {/* --- Seção Principal (Hero) --- */}
-        <section className="bg-gray-50 py-10">
-          <div className="container mx-auto flex flex-col md:flex-row items-center justify-between text-center md:text-left px-6 py-20">
+        <section className="bg-gray-50">
+          <div className="container mx-auto flex flex-col md:flex-row items-center justify-between text-center md:text-left px-6 py-14 sm:py-48">
             <div className="md:w-1/2 mb-10 md:mb-0">
               <h1 className="text-4xl md:text-5xl font-extrabold text-[#002415] leading-tight mb-4">
                 Gerencie Seus Requerimentos de Forma Simples e Rápida
@@ -49,16 +49,25 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link href="/signin">
-                  <button className="w-full sm:w-auto bg-[#002415] hover:bg-emerald-800 text-white font-bold py-3 px-8 rounded-lg text-lg cursor-pointer transition-transform hover:scale-105">
+                  <button className="w-full sm:w-auto bg-[#002415] hover:bg-emerald-800 cursor-pointer text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform hover:scale-105">
                     Acessar sua Conta
                   </button>
                 </Link>
                 <Link href="/signup">
-                  <button className="w-full sm:w-auto bg-white text-[#002415] border-2 border-[#002415] font-bold py-3 px-8 rounded-lg cursor-pointer text-lg transition-transform hover:scale-105">
+                  <button className="w-full sm:w-auto bg-white text-[#002415] border-2  cursor-pointer border-[#002415] font-bold py-3 px-8 rounded-lg text-lg transition-transform hover:scale-105">
                     Cadastre-se
                   </button>
                 </Link>
               </div>
+            </div>
+            <div className="w-3/4 md:w-1/2 flex justify-center py-4 sm:py-0">
+              <Image
+                src="/images/Group 7.png"
+                alt="Mascote Chat Request"
+                width={600}
+                height={600}
+                className=""
+              />
             </div>
           </div>
         </section>
@@ -123,8 +132,8 @@ export default function HomePage() {
                 <div className="md:w-1/2">
                     <h2 className="text-3xl font-bold mb-4">Painel Exclusivo para o CRADT</h2>
                     <p className="text-slate-300 mb-6">Centralize, gerencie e responda a todos os requerimentos em uma plataforma unificada, otimizando o tempo e a comunicação com os alunos.</p>
-                    <Link href="/cradt/login">
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    <Link href="/cradt/signin">
+                        <button className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
                             Acessar Painel de Admin
                         </button>
                     </Link>
