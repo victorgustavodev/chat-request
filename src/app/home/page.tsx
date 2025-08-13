@@ -10,7 +10,7 @@ import { MenuNav } from "./../../components/chat-bot/nav/MenuNav";
 import { 
   validateToken, 
   getMinhasMatriculas, 
-  getTiposRequerimento, // Garanta que esta função exista no seu service
+  getTiposRequerimento,
   cadastrarRequerimento 
 } from "@/services/userService";
 
@@ -32,7 +32,7 @@ interface TipoRequerimento {
   anexos_exigidos: AnexoExigido[];
 }
 
-// --- (Componentes auxiliares como FileUploadStep e RequirementTypeStep continuam aqui) ---
+// --- (Componentes auxiliares como FileUploadStep, RequirementTypeStep, ObservationsStep continuam aqui) ---
 const FileUploadStep = ({
   onSubmit,
 }: {
@@ -124,6 +124,39 @@ const RequirementTypeStep = ({
   );
 };
 
+const ObservationsStep = ({ onSubmit }: { onSubmit: (observations: string) => void; }) => {
+    const [observations, setObservations] = useState("");
+
+    const handleSubmit = () => {
+        onSubmit(observations);
+    };
+
+    return (
+        <div className="w-full max-w-lg p-4 bg-white rounded-lg shadow-md flex flex-col gap-4 animate-fade-in-up">
+            <h3 className="text-lg font-semibold text-gray-800">Observações (Opcional)</h3>
+            <div>
+                <label htmlFor="observations" className="block text-sm font-medium text-gray-700 mb-1">
+                    Se desejar, adicione alguma observação à sua solicitação.
+                </label>
+                <textarea
+                    id="observations"
+                    value={observations}
+                    onChange={(e) => setObservations(e.target.value)}
+                    rows={4}
+                    className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Ex: Solicito urgência na emissão do documento."
+                />
+            </div>
+            <button
+                onClick={handleSubmit}
+                className="w-full bg-green-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-800 transition-colors"
+            >
+                Continuar
+            </button>
+        </div>
+    );
+};
+
 
 // --- COMPONENTE PRINCIPAL DA PÁGINA ---
 export default function Home() {
@@ -134,15 +167,13 @@ export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<any[]>([]);
-  
-  // States para os dados da API
   const [availableRegistrations, setAvailableRegistrations] = useState<Matricula[]>([]);
   const [requirementTypes, setRequirementTypes] = useState<TipoRequerimento[]>([]);
   
-  // State para coletar os dados do requerimento
   const [requirementData, setRequirementData] = useState<{
       id_matricula?: number;
       id_tipo_requerimento?: number;
+      observacoes?: string;
       tipo_requerimento_obj?: TipoRequerimento;
   }>({});
 
@@ -177,7 +208,7 @@ export default function Home() {
     checkAuthAndFetchData();
   }, [router]);
 
-  // Efeito para montar a mensagem inicial APENAS QUANDO a autenticação estiver verificada
+  // Efeito para montar a mensagem inicial
   useEffect(() => {
     if (isAuthChecked) {
       startNewFlow();
@@ -192,7 +223,7 @@ export default function Home() {
   // --- Funções do Fluxo do Chat ---
 
   const startNewFlow = () => {
-    const initialMessages = [
+    setMessages([
         { id: Date.now(), component: <CardMain />, alignment: "center" },
         {
           id: Date.now() + 1,
@@ -203,9 +234,7 @@ export default function Home() {
           layout: "grid grid-cols-1 sm:grid-cols-2",
           disabled: false,
         },
-    ];
-    // Adiciona as mensagens iniciais ao histórico existente
-    setMessages(prev => [...prev, ...initialMessages]);
+    ]);
   };
 
   const disableLastOptions = () => {
@@ -215,11 +244,7 @@ export default function Home() {
   const addUserMessage = (text: string) => {
     const userMessage = {
       id: Date.now(),
-      component: (
-        <div className="bg-green-700 text-white p-3 rounded-lg max-w-xs shadow">
-          {text}
-        </div>
-      ),
+      component: <div className="bg-green-700 text-white p-3 rounded-lg max-w-xs shadow">{text}</div>,
       alignment: "end",
     };
     disableLastOptions();
@@ -231,9 +256,7 @@ export default function Home() {
     setTimeout(() => {
       if (option === "Solicitar Requerimento") {
         askForRegistration();
-      } else {
-        // Lógica para consultar requerimentos
-      }
+      } else { /* Lógica para consultar requerimentos */ }
     }, 800);
   };
 
@@ -260,7 +283,6 @@ export default function Home() {
     const selectedRegistration = availableRegistrations.find(reg => reg.numero_matricula === registrationNumber);
 
     if (selectedRegistration) {
-      // **CORREÇÃO APLICADA AQUI**
       setRequirementData(prev => ({ ...prev, id_matricula: selectedRegistration.id_matricula }));
       addUserMessage(registrationText);
       setTimeout(askForRequirementType, 800);
@@ -270,12 +292,7 @@ export default function Home() {
   const askForRequirementType = () => {
     const botMessage = {
       id: Date.now(),
-      component: (
-        <RequirementTypeStep
-          allTypes={requirementTypes.map(rt => rt.nome_requerimento)}
-          onSelect={handleTypeSelect}
-        />
-      ),
+      component: <RequirementTypeStep allTypes={requirementTypes.map(rt => rt.nome_requerimento)} onSelect={handleTypeSelect} />,
       alignment: "start",
     };
     setMessages((prev) => [...prev, botMessage]);
@@ -285,17 +302,37 @@ export default function Home() {
     const selectedType = requirementTypes.find(rt => rt.nome_requerimento === typeName);
     
     if (selectedType) {
-      // **CORREÇÃO APLICADA AQUI**
       setRequirementData(prev => ({ ...prev, id_tipo_requerimento: selectedType.id_tipo_requerimento, tipo_requerimento_obj: selectedType }));
       addUserMessage(typeName);
-      setTimeout(() => {
-        if (selectedType.anexos_exigidos && selectedType.anexos_exigidos.length > 0) {
-          askForAttachment();
-        } else {
-          finalizeRequirement(null);
-        }
-      }, 800);
+      setTimeout(askForObservations, 800);
     }
+  };
+  
+  const askForObservations = () => {
+    const botMessage = {
+        id: Date.now(),
+        component: <ObservationsStep onSubmit={handleObservationsSubmit} />,
+        alignment: 'start'
+    };
+    setMessages(prev => [...prev, botMessage]);
+  };
+  
+  const handleObservationsSubmit = (observations: string) => {
+      // **CORREÇÃO APLICADA AQUI**
+      setRequirementData(prev => ({ ...prev, observacoes: observations }));
+      addUserMessage(observations || "Nenhuma observação.");
+
+      setTimeout(() => {
+          setRequirementData(currentData => {
+            const currentRequirement = currentData.tipo_requerimento_obj;
+            if (currentRequirement?.anexos_exigidos && currentRequirement.anexos_exigidos.length > 0) {
+                askForAttachment();
+            } else {
+                finalizeRequirement(null);
+            }
+            return currentData;
+          });
+      }, 800);
   };
 
   const askForAttachment = () => {
@@ -308,45 +345,53 @@ export default function Home() {
   };
 
   const finalizeRequirement = async (file: File | null) => {
-    // Desabilita a última etapa (upload ou seleção de tipo)
-    disableLastOptions();
-
-    const fileMessage = file ? `Arquivo "${file.name}" anexado.` : "Nenhum anexo necessário.";
-    const userFileMessage = { id: Date.now(), component: <div className="bg-green-700 text-white p-3 rounded-lg max-w-xs shadow">{fileMessage}</div>, alignment: "end" };
+    const fileMessageText = file ? `Arquivo "${file.name}" anexado.` : "Nenhum anexo necessário.";
+    const userFileMessage = { id: Date.now(), component: <div className="bg-green-700 text-white p-3 rounded-lg max-w-xs shadow">{fileMessageText}</div>, alignment: "end" };
     
     const sendingMessage = { id: Date.now() + 1, component: <div className="bg-white p-3 rounded-lg text-gray-800 max-w-xs shadow">Enviando sua solicitação...</div>, alignment: 'start' };
     
+    disableLastOptions();
     setMessages(prev => [...prev, userFileMessage, sendingMessage]);
 
-    const formData = new FormData();
-    formData.append('id_matricula', String(requirementData.id_matricula));
-    formData.append('id_tipo_requerimento', String(requirementData.id_tipo_requerimento));
+    setRequirementData(currentData => {
+        const formData = new FormData();
+        formData.append('id_matricula', String(currentData.id_matricula));
+        formData.append('id_tipo_requerimento', String(currentData.id_tipo_requerimento));
+        
+        if (currentData.observacoes) {
+            formData.append('observacoes', currentData.observacoes);
+        }
 
-    if (file && requirementData.tipo_requerimento_obj?.anexos_exigidos[0]) {
-        formData.append('anexos[0][file]', file);
-        formData.append('anexos[0][id_tipo_anexo]', String(requirementData.tipo_requerimento_obj.anexos_exigidos[0].id_tipo_anexo));
-    }
+        if (file && currentData.tipo_requerimento_obj?.anexos_exigidos[0]) {
+            formData.append('anexos[0][file]', file);
+            formData.append('anexos[0][id_tipo_anexo]', String(currentData.tipo_requerimento_obj.anexos_exigidos[0].id_tipo_anexo));
+        }
 
-    try {
-        await cadastrarRequerimento(formData);
-        const confirmationMessage = {
-            id: Date.now() + 2,
-            component: <div className="bg-white p-4 rounded-lg text-gray-800 max-w-md shadow text-center">✅<br/><strong>Requerimento enviado com sucesso!</strong><br/>O que deseja fazer agora?</div>,
-            alignment: 'center'
-        };
-        setMessages(prev => [...prev.slice(0, -1), confirmationMessage]);
-    } catch (error: any) {
-        const errorMessage = {
-            id: Date.now() + 2,
-            component: <div className="bg-red-100 p-4 rounded-lg text-red-700 max-w-md shadow text-center">❌<br/><strong>Falha ao enviar!</strong><br/>{error.message}</div>,
-            alignment: 'center'
-        };
-        setMessages(prev => [...prev.slice(0, -1), errorMessage]);
-    } finally {
-        setTimeout(() => {
-            startNewFlow(); // Reinicia o fluxo
-        }, 2000);
-    }
+        cadastrarRequerimento(formData)
+            .then(() => {
+                const confirmationMessage = {
+                    id: Date.now() + 2,
+                    component: <div className="bg-white p-4 rounded-lg text-gray-800 max-w-md shadow text-center">✅<br/><strong>Requerimento enviado com sucesso!</strong><br/>O que deseja fazer agora?</div>,
+                    alignment: 'center'
+                };
+                setMessages(prev => [...prev.slice(0, -1), confirmationMessage]);
+            })
+            .catch((error) => {
+                const errorMessage = {
+                    id: Date.now() + 2,
+                    component: <div className="bg-red-100 p-4 rounded-lg text-red-700 max-w-md shadow text-center">❌<br/><strong>Falha ao enviar!</strong><br/>{error.message}</div>,
+                    alignment: 'center'
+                };
+                setMessages(prev => [...prev.slice(0, -1), errorMessage]);
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    startNewFlow();
+                }, 2000);
+            });
+        
+        return currentData;
+    });
   };
 
   const toggleMenu = () => {
