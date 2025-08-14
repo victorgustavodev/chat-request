@@ -32,6 +32,28 @@ interface LoginWithEmailData {
   password: string;
 }
 
+export async function getMe(): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado.');
+  }
+
+  const response = await fetch('http://127.0.0.1:8000/api/me', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Falha ao buscar os dados do usuário.');
+  }
+
+  return response.json();
+}
+
 export async function listarUsuarios() {
   const response = await fetch("http://127.0.0.1:8000/api/alunos");
   return await response.json();
@@ -287,16 +309,23 @@ export async function getMeusRequerimentos(): Promise<any[]> {
 
 }
 
-export async function updateRequerimentoStatus(id: number, status: 'Deferido' | 'Indeferido'): Promise<Requerimento> {
-  // CORREÇÃO: Usar crases (`) para a URL funcionar com a variável ${id}
-  // e remover a barra dupla "//"
+export async function updateRequerimentoStatus(
+  token: string, // 1. Adiciona o token como o primeiro parâmetro
+  id: number, 
+  status: 'Deferido' | 'Indeferido'
+): Promise<Requerimento> {
+  
+  if (!token) {
+    throw new Error("Token de autenticação não fornecido.");
+  }
+
   const response = await fetch(`http://127.0.0.1:8000/api/requerimentos/${id}/status`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      // Se você usa autenticação, adicione o header aqui:
-      // 'Authorization': `Bearer ${your_token}`,
+      // 2. Adiciona o cabeçalho de autorização com o token
+      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify({ status }),
   });
@@ -308,3 +337,25 @@ export async function updateRequerimentoStatus(id: number, status: 'Deferido' | 
 
   return response.json();
 }
+
+// export async function updateRequerimentoStatus(id: number, status: 'Deferido' | 'Indeferido'): Promise<Requerimento> {
+//   // CORREÇÃO: Usar crases (`) para a URL funcionar com a variável ${id}
+//   // e remover a barra dupla "//"
+//   const response = await fetch(`http://127.0.0.1:8000/api/requerimentos/${id}/status`, {
+//     method: 'PATCH',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Accept': 'application/json',
+//       // Se você usa autenticação, adicione o header aqui:
+//       // 'Authorization': `Bearer ${your_token}`,
+//     },
+//     body: JSON.stringify({ status }),
+//   });
+
+//   if (!response.ok) {
+//     const errorData = await response.json();
+//     throw new Error(errorData.message || 'Ocorreu um erro ao atualizar o status.');
+//   }
+
+//   return response.json();
+// }

@@ -7,12 +7,13 @@ import { CardMain } from "@/components/chat-bot/cards/cardMain";
 import { CardOption } from "@/components/chat-bot/cards/cardOption";
 import { Navbar } from "@/components/chat-bot/nav/Navbar";
 import { MenuNav } from "./../../components/chat-bot/nav/MenuNav";
-import { 
-  validateToken, 
-  getMinhasMatriculas, 
+import {
+  validateToken,
+  getMinhasMatriculas,
   getTiposRequerimento,
   cadastrarRequerimento,
-  getMeusRequerimentos // Importe a nova função
+  getMeusRequerimentos, // Importe a nova função
+  getMe
 } from "@/services/userService";
 
 // --- Interfaces ---
@@ -78,14 +79,14 @@ const ConsultarRequerimentos = () => {
     if (error) return <div className="text-center p-4 text-red-600">{error}</div>;
 
     return (
-        <div className="w-full p-4 sm:p-6 bg-white rounded-xl shadow-lg flex flex-col gap-4">
+        <div className="w-full max-w-2xl p-4 sm:p-6 bg-white rounded-xl shadow-lg flex flex-col gap-4 animate-fade-in-up">
             <h3 className="text-lg font-bold text-gray-800">Seus Requerimentos</h3>
             {requerimentos.length === 0 ? (
                 <p className="text-gray-500">Você ainda não solicitou nenhum requerimento.</p>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                     {requerimentos.map(req => (
-                        <div key={req.id_requerimento} className="p-3 border rounded-md flex justify-between items-center">
+                        <div key={req.id_requerimento} className="p-3 border border-gray-200 rounded-md flex justify-between items-center">
                             <div>
                                 <p className="font-semibold">{req.tipo_requerimento.nome_requerimento}</p>
                                 <p className="text-xs text-gray-500">Protocolo: {req.protocolo}</p>
@@ -239,6 +240,7 @@ export default function Home() {
   const [messages, setMessages] = useState<any[]>([]);
   const [availableRegistrations, setAvailableRegistrations] = useState<Matricula[]>([]);
   const [requirementTypes, setRequirementTypes] = useState<TipoRequerimento[]>([]);
+  const [userName, setUserName] = useState<string>("");
   
   const [requirementData, setRequirementData] = useState<{
       id_matricula?: number;
@@ -264,11 +266,13 @@ export default function Home() {
         const isValid = await validateToken(token);
         if (!isValid) throw new Error("Token inválido");
         
-        const [matriculasData, tiposData] = await Promise.all([
+        const [userData, matriculasData, tiposData] = await Promise.all([
+            getMe(),
             getMinhasMatriculas(),
             getTiposRequerimento()
         ]);
 
+        setUserName(userData.nome_completo);
         setAvailableRegistrations(matriculasData); 
         setRequirementTypes(tiposData);
         setIsAuthChecked(true);
@@ -295,8 +299,7 @@ export default function Home() {
   // --- Funções do Fluxo do Chat ---
 
   const startNewFlow = () => {
-    const initialMessages = [
-        { id: Date.now(), component: <CardMain />, alignment: "center" },
+    setMessages([
         {
           id: Date.now() + 1,
           type: "options",
@@ -306,8 +309,7 @@ export default function Home() {
           layout: "grid grid-cols-1 sm:grid-cols-2",
           disabled: false,
         },
-    ];
-    setMessages(prev => [...prev, ...initialMessages]);
+    ]);
   };
 
   const disableLastOptions = () => {
@@ -344,13 +346,17 @@ export default function Home() {
       const restartOptions = {
           id: Date.now() + 1,
           type: "options",
-          options: ["Solicitar Outro Requerimento"],
+          options: ["Solicitar Novo Requerimento", "Voltar ao Início"],
           handler: (opt: string) => {
               addUserMessage(opt);
-              setTimeout(askForRegistration, 800);
+              if (opt === "Solicitar Novo Requerimento") {
+                  setTimeout(askForRegistration, 800);
+              } else {
+                  setTimeout(startNewFlow, 800);
+              }
           },
           alignment: 'center',
-          layout: 'grid grid-cols-1',
+          layout: 'grid grid-cols-1 sm:grid-cols-2',
           disabled: false
       };
       setMessages(prev => [...prev, botMessage, restartOptions]);
@@ -476,7 +482,16 @@ export default function Home() {
         setMessages(prev => [...prev.slice(0, -1), errorMessage]);
     } finally {
         setTimeout(() => {
-            startNewFlow();
+            const restartOptions = {
+                id: Date.now() + 3,
+                type: "options",
+                options: ["Solicitar Requerimento", "Consultar Requerimentos"],
+                handler: handleInitialOption,
+                alignment: "center",
+                layout: "grid grid-cols-1 sm:grid-cols-2",
+                disabled: false,
+            };
+            setMessages(prev => [...prev, restartOptions]);
         }, 2000);
     }
   };
@@ -513,6 +528,12 @@ export default function Home() {
       </div>
       <main className="flex-1 overflow-y-auto p-4">
         <div className="flex flex-col gap-5 w-full max-w-3xl mx-auto">
+          {userName && (
+              <div className="text-center mb-4">
+                  <h2 className="text-2xl font-semibold text-gray-700">Olá, {userName}!</h2>
+              </div>
+          )}
+
           {messages.map((msg) => {
             const containerClasses = `flex w-full justify-${
               msg.alignment || "center"

@@ -40,7 +40,7 @@ export default function SigninCradt() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gray-100 md:bg-transparent flex flex-col md:flex-row">
       {/* Lado esquerdo */}
       <div className="hidden md:flex flex-col justify-center items-center bg-slate-800 text-white w-full md:w-1/2 p-8">
         <div className="text-center max-w-sm">

@@ -14,28 +14,32 @@ export default function RequerimentoDetalhePage() {
   const [requerimento, setRequerimento] = useState<Requerimento | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false); // Estado para o loading dos botões
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Função para buscar os dados iniciais
-  const fetchRequerimento = () => {
-    if (!id) return;
-
-    setLoading(true);
-    setError(null);
-
-    getRequerimentoById(id)
-      .then((data) => {
-        setRequerimento(data);
-        setError(null);
-      })
-      .catch((err) =>
-        setError(err.message || "Erro ao carregar o requerimento")
-      )
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
+    const fetchRequerimento = async () => {
+      if (!id) return;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token de autenticação não encontrado. Faça login novamente.");
+        }
+
+        const data = await getRequerimentoById(id, token);
+        setRequerimento(data);
+
+      } catch (err: any) {
+        setError(err.message || "Erro ao carregar o requerimento");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchRequerimento();
   }, [id]);
 
@@ -47,8 +51,13 @@ export default function RequerimentoDetalhePage() {
     setError(null);
 
     try {
-      const updatedRequerimento = await updateRequerimentoStatus(requerimento.id_requerimento, newStatus);
-      setRequerimento(updatedRequerimento); // Atualiza o estado local com os novos dados
+      // **CORREÇÃO APLICADA AQUI**
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token não encontrado. Faça login novamente.");
+
+      // Passa o token para a função de atualização
+      const updatedRequerimento = await updateRequerimentoStatus(token, requerimento.id_requerimento, newStatus);
+      setRequerimento(updatedRequerimento);
       alert(`Requerimento ${newStatus.toLowerCase()} com sucesso!`);
     } catch (err: any) {
       setError(err.message || "Não foi possível atualizar o status.");
@@ -64,7 +73,7 @@ export default function RequerimentoDetalhePage() {
       </div>
     );
 
-  if (error && !requerimento) // Mostra erro fatal se não conseguir carregar nada
+  if (error && !requerimento)
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-[#002415]">
         <p className="text-red-400 text-lg font-semibold">Erro: {error}</p>
@@ -92,7 +101,6 @@ export default function RequerimentoDetalhePage() {
           Detalhes do Requerimento
         </h1>
         
-        {/* Exibe erro de atualização, se houver */}
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -105,7 +113,7 @@ export default function RequerimentoDetalhePage() {
             <div className="md:col-span-2">
                 <strong>Tipo de Requerimento:</strong> {requerimento.tipo_requerimento.nome_requerimento}
             </div>
-             <div>
+              <div>
                 <strong>Status:</strong>{" "}
                 <span className={`px-2 py-1 rounded text-white ${
                     requerimento.status === "Em Análise" ? "bg-yellow-600"
@@ -136,7 +144,6 @@ export default function RequerimentoDetalhePage() {
           </p>
         </div>
         
-        {/* Mostra botões apenas se o status for "Em Análise" */}
         {requerimento.status === 'Em Análise' && (
             <div className="flex justify-end gap-4 mt-8">
                 <button
