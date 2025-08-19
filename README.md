@@ -17,13 +17,11 @@ Este sistema tem como objetivo facilitar o processo de solicitação de requerim
 
 ## 🛠 Tecnologias Utilizadas
 
-*Front*: react + tailwind.css + ts
+*Front*: Next + tailwind.css + ts
 
-*Microservices*:  express + node.js + ts 
+*Back*: Laravel + Sanctum -> [https://github.com/lauraesterfani/Chat-Request]
 
-*API(back)*: Laravel + Sanctum
-
-*Banco*: postegres + Docker + sequelize
+*Banco*: MySQL
 
 ---
 
