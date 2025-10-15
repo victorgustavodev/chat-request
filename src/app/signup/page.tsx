@@ -16,8 +16,7 @@ export default function Signup() {
     password_confirmation: "",
     cpf: "",
     phone: "",
-    identidade: "",
-    orgao_expedidor: "",
+    birthday: "",
   });
 
   const [mensagem, setMensagem] = useState("");
@@ -32,14 +31,13 @@ export default function Signup() {
     setErrors({});
 
     const payload = {
-      nome_completo: form.name,
+      name: form.name,
       email: form.email,
       password: form.password,
       password_confirmation: form.password_confirmation,
-      cpf: form.cpf.replace(/\D/g, ""),
-      telefone: form.phone.replace(/\D/g, ""),
-      identidade: form.identidade,
-      orgao_expedidor: form.orgao_expedidor,
+      cpf: form.cpf.replace(/\D/g, ""), // remove pontos e traços
+      phone: form.phone.replace(/\D/g, ""), // remove parênteses e hífens
+      birthday: form.birthday, // formato YYYY-MM-DD
     };
 
     try {
@@ -78,7 +76,7 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <div className="hidden md:flex flex-col justify-center items-center bg-[#002415] text-white w-full md:w-1/2 p-8">
-        <h1 className="text-4xl font-bold mb-4">Bem Vindo ao</h1>
+        <h1 className="text-4xl font-bold mb-4">Bem-vindo ao</h1>
         <h2 className="text-4xl font-bold mb-4">Chat Request!</h2>
         <p className="text-lg text-center max-w-md">
           Cadastre-se para acessar nosso serviço de gerenciamento e consulta de
@@ -111,9 +109,12 @@ export default function Signup() {
               value={form.name}
               onChange={(value) => setForm({ ...form, name: value })}
               required
-              error={errors.nome_completo ? errors.nome_completo[0] : undefined}
-              iconRight={<img src="/images/user.svg" alt="User" className="w-4 h-4" />}
+              error={errors.name ? errors.name[0] : undefined}
+              iconRight={
+                <img src="/images/user.svg" alt="User" className="w-4 h-4" />
+              }
             />
+
             <TextField
               label="E-mail"
               type="email"
@@ -122,49 +123,53 @@ export default function Signup() {
               onChange={(value) => setForm({ ...form, email: value })}
               required
               error={errors.email ? errors.email[0] : undefined}
-              iconRight={<img src="/images/email.svg" alt="Email" className="w-4 h-4" />}
+              iconRight={
+                <img src="/images/email.svg" alt="Email" className="w-4 h-4" />
+              }
             />
+
             <TextField
               label="CPF"
-              type="cpf"
+              type="text"
               MaxLength={14}
               placeholder="000.000.000-00"
               value={form.cpf}
               onChange={(value) => setForm({ ...form, cpf: value })}
               required
               error={errors.cpf ? errors.cpf[0] : undefined}
-              iconRight={<img src="/images/cpf.svg" alt="CPF" className="w-4 h-4" />}
+              iconRight={
+                <img src="/images/cpf.svg" alt="CPF" className="w-4 h-4" />
+              }
             />
+
             <TextField
               label="Telefone"
-              type="phone"
+              type="text"
               MaxLength={15}
               placeholder="(00) 00000-0000"
               value={form.phone}
               onChange={(value) => setForm({ ...form, phone: value })}
-              error={errors.telefone ? errors.telefone[0] : undefined}
-              iconRight={<img src="/images/phone.svg" alt="telefone" className="w-4 h-4" />}
-            />
-            <TextField
-              label="Nº Identidade (RG)"
-              type="text"
-              placeholder="Digite o número da sua identidade"
-              value={form.identidade}
-              onChange={(value) => setForm({ ...form, identidade: value })}
               required
-              error={errors.identidade ? errors.identidade[0] : undefined}
-              iconRight={<img src="/images/rg.svg" alt="RG" className="w-4 h-4" />}
+              error={errors.phone ? errors.phone[0] : undefined}
+              iconRight={
+                <img
+                  src="/images/phone.svg"
+                  alt="telefone"
+                  className="w-4 h-4"
+                />
+              }
             />
+
             <TextField
-              label="Órgão Expedidor"
-              type="text"
-              placeholder="Ex: SDS/PE"
-              value={form.orgao_expedidor}
-              onChange={(value) => setForm({ ...form, orgao_expedidor: value })}
+              label="Data de Nascimento"
+              type="date"
+              placeholder="Selecione sua data de nascimento"
+              value={form.birthday}
+              onChange={(value) => setForm({ ...form, birthday: value })}
               required
-              error={errors.orgao_expedidor ? errors.orgao_expedidor[0] : undefined}
-              iconRight={<img src="/images/sds.svg" alt="SDS" className="w-4 h-4" />}
+              error={errors.birthday ? errors.birthday[0] : undefined}
             />
+
             <TextField
               label="Senha"
               type="password"
@@ -174,6 +179,7 @@ export default function Signup() {
               required
               error={errors.password ? errors.password[0] : undefined}
             />
+
             <TextField
               label="Confirme a senha"
               type="password"
@@ -183,7 +189,11 @@ export default function Signup() {
                 setForm({ ...form, password_confirmation: value })
               }
               required
-              error={errors.password_confirmation ? errors.password_confirmation[0] : undefined}
+              error={
+                errors.password_confirmation
+                  ? errors.password_confirmation[0]
+                  : undefined
+              }
             />
 
             <Button

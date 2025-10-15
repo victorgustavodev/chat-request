@@ -24,4 +24,17 @@
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "tailwind.config.js"],
   "exclude": ["node_modules"]
+  ,
+  "react": {
+  "compilerOptions": {
+    // Garante que o TypeScript entenda a sintaxe JSX
+    "jsx": "react-jsx", 
+    
+    // Inclui as definições de tipos do React
+    "lib": ["dom", "dom.iterable", "esnext"], 
+    
+    // E garante que as types do React sejam carregadas
+    "types": ["react", "react-dom"] 
+  }
+  }
 }

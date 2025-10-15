@@ -5,7 +5,8 @@
 // Defina uma interface para as props do componente
 interface CardOptionProps {
   title: string;
-  onClick: () => void; // A prop onClick agora é uma função que não retorna nada
+  onClick: () => void; 
+  disabled?: boolean; // A prop onClick agora é uma função que não retorna nada
 }
 
 export const CardOption = ({ title, onClick }: CardOptionProps) => {
